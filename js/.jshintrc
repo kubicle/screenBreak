@@ -1,0 +1,13 @@
+{
+  // Example: https://github.com/jshint/jshint/blob/master/examples/.jshintrc
+  // Documentation: http://www.jshint.com/docs/options/
+  "browser": true,
+  "node": true,
+  "esnext": true,
+  "globals": {
+  },
+  "strict": "global",
+  "quotmark": true,
+  "undef": true,
+  "unused": true
+}

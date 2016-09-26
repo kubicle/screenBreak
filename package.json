@@ -1,0 +1,28 @@
+{
+    "main": "index.html",
+    "name": "timeslicer",
+    "version": "0.1.0",
+    "dependencies": {
+    },
+    "devDependencies": {
+        "browserify": "~13.0.0",
+        "lessify": "~1.0.1",
+        "watchify": "^3.2.2"
+    },
+    "scripts": {
+        "build": "watchify js/app.js -t lessify -o build/build.js -v"
+    },
+    "window": {
+        "title": "node-webkit demo",
+        "icon": "link.png",
+        "toolbar": false,
+        "frame": false,
+        "width": 445,
+        "height": 81,
+        "position": "mouse",
+        "min_width": 233,
+        "min_height": 50,
+        "max_width": 560,
+        "max_height": 130
+    }
+}
