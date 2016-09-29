@@ -50,7 +50,7 @@ Ui.prototype._newButton = function (parent, className, label, action) {
 Ui.prototype._createButtons = function (parent) {
     this.pauseBtn = this._newButton(parent, 'pauseBtn', 'Bye!', 'pause');
     this.pingBtn = this._newButton(parent, 'pingBtn', 'I am here', 'ping');
-    this.resetBtn = this._newButton(parent, 'resetBtn', 'I had a break', 'reset');
+    this.resetBtn = this._newButton(parent, 'resetBtn', 'Got a break', 'reset');
 };
 
 Ui.prototype.setWorking = function (isWorking) {
