@@ -5,6 +5,7 @@
   "node": true,
   "esnext": true,
   "globals": {
+    "nw": true
   },
   "strict": "global",
   "quotmark": true,

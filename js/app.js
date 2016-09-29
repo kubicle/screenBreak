@@ -4,6 +4,7 @@ require('./ui/style.less');
 var pkg = require('../package.json');
 var Ui = require('./ui/Ui');
 var Workometer = require('./Workometer');
+var nwUtil = require('./nwUtil');
 var localPref = require('./localPref');
 
 var WORKING_REFRESH_FREQ = 60000;
@@ -38,7 +39,7 @@ App.prototype.initialize = function () {
 	this.refreshMethod = this.refresh.bind(this);
 	this.refreshInterval = null;
 
-	window.addEventListener('beforeunload', this.terminate.bind(this));
+	nwUtil.listenBeforeunload(this.terminate.bind(this));
 
 	this._noteUserIsHere();
 	this.toggle();

@@ -10,7 +10,7 @@
         "watchify": "^3.2.2"
     },
     "scripts": {
-        "build": "watchify js/app.js -t lessify -o build/build.js -v"
+        "build": "watchify js/app.js --no-detect-globals --bare -t lessify -o build/build.js -v"
     },
     "window": {
         "title": "node-webkit demo",
