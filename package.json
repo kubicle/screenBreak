@@ -14,15 +14,15 @@
     },
     "window": {
         "title": "node-webkit demo",
-        "icon": "link.png",
+        "icon": "timeslicer.png",
         "toolbar": false,
         "frame": false,
-        "width": 445,
-        "height": 81,
-        "position": "mouse",
+        "width": 468,
+        "height": 50,
+        "position": "center",
         "min_width": 233,
         "min_height": 50,
         "max_width": 560,
-        "max_height": 130
+        "max_height": 90
     }
 }
