@@ -13,8 +13,9 @@ var RESTING_REFRESH_FREQ = 1000;
 var WORKING_ALERT_FREQ = 60000 * 15;
 var RESTING_ALERT_FREQ = 60000;
 
-var ANNOYING_ALERT_AFTER = 60; // minutes
 var AUTOPAUSE_AFTER_INACTION = 75; // minutes
+
+var ANNOYING_ALERT_LEVEL = 100; // %
 
 
 function App() {
@@ -75,13 +76,13 @@ App.prototype.checkAlert = function () {
 		this.lastAlertTime = now;
 		this.ui.showAlert(10);
 
-		var minutesInactive = (now - this.lastUserActionTime) / 60000;
-		if (minutesInactive > ANNOYING_ALERT_AFTER) {
-			// Start annoying alert until ping
+		if (this.workometer.getLevel() >= ANNOYING_ALERT_LEVEL) {
 			this.ui.showAlert();
 		}
+
+		var minutesInactive = (now - this.lastUserActionTime) / 60000;
 		if (minutesInactive > AUTOPAUSE_AFTER_INACTION) {
-			this.toggle();
+			this.toggle(); // NB: annoying alert stays on while we "rest" (user is most likely gone anyway)
 		}
 	} else {
 		if (now - this.lastAlertTime < RESTING_ALERT_FREQ) return;
