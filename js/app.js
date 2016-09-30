@@ -72,20 +72,23 @@ App.prototype.refresh = function () {
 App.prototype.checkAlert = function () {
 	var now = Date.now();
 	if (this.isWorking) {
-		if (now - this.lastAlertTime < WORKING_ALERT_FREQ) return;
-		this.lastAlertTime = now;
-		this.ui.showAlert(10);
-
+		// This one could be optional: once in a while we "ring" just like an old clock
+		if (now - this.lastAlertTime >= WORKING_ALERT_FREQ) {
+			this.lastAlertTime = now;
+			this.ui.showAlert(10);
+		}
+		// When user worked over the maximum of the gauge, we complain; he can "toggle" it off each time
 		if (this.workometer.getLevel() >= ANNOYING_ALERT_LEVEL) {
 			this.ui.showAlert();
 		}
-
+		// If we did not see any user action in a while, declare this a break
 		var minutesInactive = (now - this.lastUserActionTime) / 60000;
 		if (minutesInactive > AUTOPAUSE_AFTER_INACTION) {
 			this.toggle(); // NB: annoying alert stays on while we "rest" (user is most likely gone anyway)
 		}
 	} else {
 		if (now - this.lastAlertTime < RESTING_ALERT_FREQ) return;
+		// Sometimes user came back but forgot to say it; we alert here for this case
 		this.lastAlertTime = now;
 		this.ui.showAlert(20);
 	}
