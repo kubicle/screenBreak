@@ -1,5 +1,6 @@
 'use strict';
 
+require('./mainUi.less');
 var Dome = require('./Dome');
 var touchManager = require('./TouchManager');
 

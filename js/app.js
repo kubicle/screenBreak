@@ -1,6 +1,5 @@
 'use strict';
 
-require('./ui/style.less');
 var pkg = require('../package.json');
 var Ui = require('./ui/Ui');
 var Workometer = require('./Workometer');
