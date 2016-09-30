@@ -1,8 +1,17 @@
 'use strict';
+/* eslint no-console: 0 */
 
+var painter = null;
 var curGroup = null;
 var uniqueId = 1;
 
+
+/**
+ * @param {Painter} [aPainter]
+ */
+Dome.init = function (aPainter) {
+    painter = aPainter;
+};
 
 /**
  * @param {Dome|DOM} parent
@@ -12,16 +21,24 @@ var uniqueId = 1;
  */
 function Dome(parent, type, className, name) {
     this.type = type;
-    if (parent instanceof Dome) parent = parent.elt;
-    var elt = this.elt = parent.appendChild(document.createElement(type));
+    var elt = this.elt = document.createElement(type);
     if (name && name[0] === '#') {
         curGroup.add(name.substr(1), this);
         // Some class names are built from name so "#" could be in className too
         if (className[0] === '#') className = className.substr(1);
     }
     if (className) elt.className = className;
+    if (painter) painter.paint(elt, className);
+    if (parent) {
+        (parent instanceof Dome ? parent.elt : parent).appendChild(elt);
+    }
 }
 module.exports = Dome;
+
+
+Dome.prototype.appendTo = function (parent) {
+    (parent instanceof Dome ? parent.elt : parent).appendChild(this.elt);
+};
 
 
 // Setters
@@ -29,12 +46,22 @@ module.exports = Dome;
 Dome.prototype.setText = function (text) { this.elt.textContent = text; return this; };
 Dome.prototype.setHtml = function (html) { this.elt.innerHTML = html; return this; };
 Dome.prototype.setAttribute = function (name, val) { this.elt.setAttribute(name, val); return this; };
-Dome.prototype.setEnabled = function (enable) { this.elt.disabled = !enable; return this; };
 Dome.prototype.setStyle = function (prop, value) { this.elt.style[prop] = value; return this; };
 
 Dome.prototype.setVisible = function (show) {
-    if (this.type === 'div') return this.setStyle('display', show ? '' : 'none');
-    this.elt.hidden = !show;
+    if (show === this.isVisible()) return this;
+    this.elt.style.display = show ? '' : 'none';
+    this._isVisible = !!show;
+    return this;
+};
+
+Dome.prototype.isVisible = function () {
+    return this._isVisible || this._isVisible === undefined; // default is visible
+};
+
+Dome.prototype.setEnabled = function (enable) {
+    this.elt.disabled = !enable;
+    this.toggleClass('disabled', !enable);
     return this;
 };
 
@@ -55,15 +82,18 @@ Dome.prototype.on = function (eventName, fn) {
 
 Dome.prototype.toggleClass = function (className, enable) {
     var elt = this.elt;
-    var classes = elt.className.split(' ');
-    var ndx = classes.indexOf(className);
+    var classes = elt.className, spClasses = ' ' + classes + ' ';
+    var spClassName = ' ' + className + ' ';
+    var pos = spClasses.indexOf(spClassName);
+
     if (enable) {
-        if (ndx >= 0) return;
-        elt.className += ' ' + className;
+        if (pos >= 0) return;
+        if (painter) painter.toggle(elt, className, enable);
+        elt.className = classes + ' ' + className;
     } else {
-        if (ndx < 0) return;
-        classes.splice(ndx, 1);
-        elt.className = classes.join(' ');
+        if (pos < 0) return;
+        elt.className = spClasses.replace(spClassName, ' ').trim();
+        if (painter) painter.toggle(elt, className, enable);
     }
 };
 
@@ -86,14 +116,37 @@ Dome.prototype.removeChild = function (child) { this.elt.removeChild(child.elt);
 
 Dome.newButton = function (parent, name, label, action) {
     var button = new Dome(parent, 'button', name + 'Button', name);
-    button.elt.innerText = label;
+    if (label) button.elt.innerText = label;
     button.on('click', action);
     return button;
 };
 
-/** A label is a span = helps to write text on the left of an element */
+Dome.newGfxButton = function (parent, name, action) {
+    var btn = Dome.newButton(parent, name, null, action);
+    btn.newDiv(name + 'BtnIcon btnIcon');
+    return btn;
+};
+
+Dome.tapBehavior = function (elt, action) {
+    elt.on('click', function (ev) {
+        ev.stopPropagation();
+        action.call(this);
+    });
+};
+
+Dome.newLink = function (parent, name, label, url) {
+    var link = new Dome(parent, 'a', name + 'Link', name);
+    link.setAttribute('href', url);
+    link.setText(label);
+    return link;
+};
+
 Dome.newLabel = function (parent, name, label) {
-    return new Dome(parent, 'span', name, name).setText(label);
+    return new Dome(parent, 'div', name, name).setText(label);
+};
+
+Dome.newBreak = function (parent) {
+    return new Dome(parent, 'br');
 };
 
 Dome.newInput = function (parent, name, label, init) {
@@ -227,4 +280,31 @@ Dome.getSelectedText = function () {
     if (!text) return null;
 
     return text.substring(range.startOffset, range.endOffset);
+};
+
+Dome.downloadFile = function (content, filename) {
+    var file = new Blob([content]);
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(file);
+    a.download = filename;
+    a.click();
+};
+
+// e.g. var fi = Dome.newInput(parent, 'loadGame', label).setAttribute('type', 'file');
+// if (fi.hasFile()) fi.uploadFile(function (content) {...});
+Dome.prototype.hasFile = function () {
+    var files = this.elt.files;
+    return files && files.length > 0;
+};
+
+Dome.prototype.uploadFile = function (cb) {
+    var files = this.elt.files;
+    if (!files) return console.error('Invalid field type for uploadFile: ' + this.type);
+    if (!files.length) return false;
+    var fr = new FileReader();
+    fr.readAsText(files[0]);
+    fr.onloadend = function () {
+        return cb(fr.result);
+    };
+    return true;
 };
