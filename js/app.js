@@ -6,15 +6,16 @@ var Workometer = require('./Workometer');
 var nwUtil = require('./nwUtil');
 var localPref = require('./localPref');
 
-var WORKING_REFRESH_FREQ = 60000;
-var RESTING_REFRESH_FREQ = 1000;
+var WORKING_REFRESH_FREQ_MS = 60000;
+var RESTING_REFRESH_FREQ_MS = 1000;
 
-var WORKING_ALERT_FREQ = 60000 * 15;
-var RESTING_ALERT_FREQ = 60000;
+var WORKING_ALERT_FREQ = 15; // minutes
+var RESTING_ALERT_FREQ = 1; // minutes
 
 var AUTOPAUSE_AFTER_INACTION = 75; // minutes
 
-var ANNOYING_ALERT_LEVEL = 100; // %
+var ANNOYING_ALERT_LEVEL = 100; // percentage of gauge
+var ANNOYING_ALERT_REPEAT_DELAY = 10; // minutes; you can make the annoying alert quite for that much before it comes back
 
 
 function App() {
@@ -70,26 +71,29 @@ App.prototype.refresh = function () {
 
 App.prototype.checkAlert = function () {
 	var now = Date.now();
+	var minutesSinceLastAlert = (now - this.lastAlertTime) / 60000;
+
 	if (this.isWorking) {
-		// This one could be optional: once in a while we "ring" just like an old clock
-		if (now - this.lastAlertTime >= WORKING_ALERT_FREQ) {
+		// Could be optional: this gives a chance to notice we forgot to switch task, etc.
+		if (minutesSinceLastAlert >= WORKING_ALERT_FREQ) {
 			this.lastAlertTime = now;
-			this.ui.showAlert(10);
+			this.ui.showAlert(5);
 		}
+		var minutesInactive = (now - this.lastUserActionTime) / 60000;
 		// When user worked over the maximum of the gauge, we complain; he can "toggle" it off each time
-		if (this.workometer.getLevel() >= ANNOYING_ALERT_LEVEL) {
+		if (this.workometer.getLevel() >= ANNOYING_ALERT_LEVEL && minutesInactive > ANNOYING_ALERT_REPEAT_DELAY) {
 			this.ui.showAlert();
 		}
 		// If we did not see any user action in a while, declare this a break
-		var minutesInactive = (now - this.lastUserActionTime) / 60000;
 		if (minutesInactive > AUTOPAUSE_AFTER_INACTION) {
 			this.toggle(); // NB: annoying alert stays on while we "rest" (user is most likely gone anyway)
 		}
 	} else {
-		if (now - this.lastAlertTime < RESTING_ALERT_FREQ) return;
-		// Sometimes user came back but forgot to say it; we alert here for this case
-		this.lastAlertTime = now;
-		this.ui.showAlert(20);
+		if (minutesSinceLastAlert >= RESTING_ALERT_FREQ) {
+			// Sometimes user came back but forgot to say it; we alert here for this case
+			this.lastAlertTime = now;
+			this.ui.showAlert(20);
+		}
 	}
 };
 
@@ -104,7 +108,7 @@ App.prototype.toggle = function () {
 	this.refresh(); // 1st refresh right now
 
 	window.clearInterval(this.refreshInterval);
-	this.currentFreq = this.isWorking ? WORKING_REFRESH_FREQ : RESTING_REFRESH_FREQ;
+	this.currentFreq = this.isWorking ? WORKING_REFRESH_FREQ_MS : RESTING_REFRESH_FREQ_MS;
 	this.refreshInterval = window.setInterval(this.refreshMethod, this.currentFreq);
 };
 
