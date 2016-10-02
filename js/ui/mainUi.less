@@ -63,7 +63,7 @@
 		}
 	}
 
-	.pingBtn, .pauseBtn, .resetBtn {
+	.pingBtn, .pauseBtn {
 		.noDrag();
 		display: inline-block;
 		vertical-align: top;
@@ -76,5 +76,23 @@
 		line-height: 30px;
 		text-align: center;
 		.noSelect();
+	}
+
+	.settingsButton {
+		.noDrag();
+		display: inline-block;
+		vertical-align: top;
+		margin: 5px;
+		width: 40px;
+		height: 30px;
+		background-color: #000;
+		border-radius: 7px;
+		border-color: #74b5a6;
+		.settingsBtnIcon {
+			height: 100%;
+			background: url("assets/settings.png") 50% no-repeat;
+			-webkit-filter: sepia(0.9) brightness(2);
+			background-size: auto 95%;
+		}
 	}
 }

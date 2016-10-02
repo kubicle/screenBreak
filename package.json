@@ -17,12 +17,12 @@
         "icon": "timeslicer.png",
         "toolbar": false,
         "frame": false,
-        "width": 468,
+        "width": 408,
         "height": 50,
         "position": "center",
         "min_width": 233,
         "min_height": 50,
-        "max_width": 560,
+        "max_width": 408,
         "max_height": 90
     }
 }

@@ -1,6 +1,7 @@
 'use strict';
 
 require('./mainUi.less');
+var ContextMenu = require('./ContextMenu');
 var Dome = require('./Dome');
 var touchManager = require('./TouchManager');
 
@@ -51,13 +52,27 @@ Ui.prototype._newButton = function (parent, className, label, action) {
 Ui.prototype._createButtons = function (parent) {
     this.pauseBtn = this._newButton(parent, 'pauseBtn', 'Bye!', 'pause');
     this.pingBtn = this._newButton(parent, 'pingBtn', 'I am here', 'ping');
-    this.resetBtn = this._newButton(parent, 'resetBtn', 'Got a break', 'reset');
+    this.settingsBtn = Dome.newGfxButton(parent, 'settings', this._showSettingsMenu.bind(this));
+};
+
+Ui.prototype._showSettingsMenu = function () {
+    var cm = this.contextMenu;
+    if (!this.contextMenu) {
+        cm = this.contextMenu = new ContextMenu();
+        cm.addOption('Got a break', this.eventHandler.bind(this, 'reset'));
+        cm.attachMenu(this.settingsBtn);
+        return;
+    }
+    if (cm.isVisible()) {
+        cm.setVisible(false);
+    } else {
+        cm.setVisible(true);
+    }
 };
 
 Ui.prototype.setWorking = function (isWorking) {
     this.pauseBtn.setVisible(isWorking);
     this.pingBtn.setVisible(!isWorking);
-    this.resetBtn.setVisible(isWorking);
 };
 
 Ui.prototype.displayGauge = function (value, label) {
