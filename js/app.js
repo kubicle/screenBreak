@@ -62,9 +62,7 @@ App.prototype.refresh = function () {
 		if (!this.isWorking) return this.toggle();
 	}
 
-	var gaugeLevel = this.workometer.getLevel();
-	var text = this.workometer.getText();
-	this.ui.refresh(gaugeLevel, text);
+	this.ui.refresh(this.workometer);
 
 	this.checkAlert();
 };

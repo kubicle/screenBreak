@@ -92,8 +92,29 @@ Ui.prototype.displayGauge = function (value, label) {
     this.label.setText(label);
 };
 
-Ui.prototype.refresh = function (gaugeLevel, label) {
-    this.displayGauge(gaugeLevel, label);
+function ms2str(ms) {
+    var min = Math.round(ms / 60000);
+    var hour = Math.floor(min / 60);
+
+    if (hour) {
+        min -= hour * 60;
+        return hour + 'h' + ('0' + min).slice(-2);
+    } else {
+        return min + 'min';
+    }
+}
+
+Ui.prototype.refresh = function (workometer) {
+    workometer.updateCounting();
+
+    var text;
+    if (workometer.isResting) {
+        text = 'resting: ' + ms2str(workometer.getFatigue());
+    } else {
+        text = ms2str(workometer.getTodaysWork());
+    }
+
+    this.displayGauge(workometer.getLevel(), text);
 };
 
 Ui.prototype._flashAlert = function () {
