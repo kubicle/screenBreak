@@ -65,6 +65,7 @@ Workometer.prototype.backFromSleep = function (pause) {
 	this._checkNewDay();
 	this.time0 = Date.now();
 	this.fatigue = Math.max(this.fatigue - pause, 0);
+	// NB: no need to adjust time counting since _countTime was not called during the pause
 };
 
 Workometer.prototype.stop = function () {
