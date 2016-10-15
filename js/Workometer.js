@@ -76,15 +76,15 @@ Workometer.prototype.stop = function () {
 
 Workometer.prototype._countTime = function () {
 	var now = Date.now();
-	var period = now - this.time0;
+	var delta = now - this.time0;
 	this.time0 = now;
 
 	if (this.isResting) {
-		this.fatigue = Math.max(this.fatigue - period, 0);
+		this.fatigue = Math.max(this.fatigue - delta, 0);
 	} else {
-		this.taskWork += period;
-		this.todaysWork += period;
-		this.fatigue += period / NONSTOP_PERIOD * REST_FOR_NONSTOP_PERIOD;
+		this.taskWork += delta;
+		this.todaysWork += delta;
+		this.fatigue += delta / NONSTOP_PERIOD * REST_FOR_NONSTOP_PERIOD;
 	}
 	this.level = this.fatigue / REST_FOR_NONSTOP_PERIOD * 100;
 };
