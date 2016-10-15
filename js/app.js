@@ -50,7 +50,7 @@ App.prototype.initialize = function () {
 
 App.prototype.terminate = function () {
 	this.workometer.stop();
-	localPref.setValue('workometerState', this.workometer.serializeState());
+	localPref.setValue('workometerState', this.workometer.serialize());
 	localPref.terminate();
 };
 

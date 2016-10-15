@@ -27,7 +27,7 @@ Workometer.prototype.reset = function () {
 	this.fatigue = 0;
 };
 
-Workometer.prototype.serializeState = function () {
+Workometer.prototype.serialize = function () {
 	return {
 		lastWorkTime: this.time0,
 		taskWork: this.taskWork,
