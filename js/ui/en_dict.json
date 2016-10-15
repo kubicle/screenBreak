@@ -1,0 +1,10 @@
+{
+    "pauseBtn": "Bye!",
+    "pingBtn": "I am here",
+    "resetAction": "Got a break",
+    "cancelAction": "Cancel",
+    "hourShort": "h",
+    "minuteShort": "min",
+    "todaysWork": "today",
+    "resting": "resting"
+}

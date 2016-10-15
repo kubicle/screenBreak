@@ -3,6 +3,7 @@
 require('./mainUi.less');
 var ContextMenu = require('./ContextMenu');
 var Dome = require('./Dome');
+var getText = require('./getText');
 var touchManager = require('./TouchManager');
 
 var MAX_COLOR_BAND = 33;
@@ -50,8 +51,8 @@ Ui.prototype._newButton = function (parent, className, label, action) {
 };
 
 Ui.prototype._createButtons = function (parent) {
-    this.pauseBtn = this._newButton(parent, 'pauseBtn', 'Bye!', 'pause');
-    this.pingBtn = this._newButton(parent, 'pingBtn', 'I am here', 'ping');
+    this.pauseBtn = this._newButton(parent, 'pauseBtn', getText('pauseBtn'), 'pause');
+    this.pingBtn = this._newButton(parent, 'pingBtn', getText('pingBtn'), 'ping');
     this.settingsBtn = Dome.newGfxButton(parent, 'settings', this._showSettingsMenu.bind(this));
 };
 
@@ -59,7 +60,7 @@ Ui.prototype._showSettingsMenu = function () {
     var cm = this.contextMenu;
     if (!this.contextMenu) {
         cm = this.contextMenu = new ContextMenu();
-        cm.addOption('Got a break', this.eventHandler.bind(this, 'reset'));
+        cm.addOption(getText('resetAction'), this.eventHandler.bind(this, 'reset'));
         cm.attachMenu(this.settingsBtn);
         return;
     }
@@ -98,9 +99,9 @@ function ms2str(ms) {
 
     if (hour) {
         min -= hour * 60;
-        return hour + 'h' + ('0' + min).slice(-2);
+        return hour + getText('hourShort') + ('0' + min).slice(-2);
     } else {
-        return min + 'min';
+        return min + getText('minuteShort');
     }
 }
 
@@ -109,12 +110,17 @@ Ui.prototype.refresh = function (workometer) {
 
     var text;
     if (workometer.isResting) {
-        text = 'resting: ' + ms2str(workometer.getFatigue());
+        text = getText('resting') + ': ' + ms2str(workometer.getFatigue());
     } else {
         text = ms2str(workometer.getTodaysWork());
     }
 
     this.displayGauge(workometer.getLevel(), text);
+};
+
+Ui.prototype._switchDisplay = function () {
+    this.curDisplay = (this.curDisplay + 1) % DISPLAY_TYPES.length;
+    this.refresh();
 };
 
 Ui.prototype._flashAlert = function () {

@@ -2,6 +2,7 @@
 
 require('./contextMenu.less');
 var Dome = require('./Dome');
+var getText = require('./getText');
 
 
 function ContextMenu() {
@@ -25,7 +26,7 @@ ContextMenu.prototype.addOption = function(label, action) {
 };
 
 ContextMenu.prototype.attachMenu = function(parent) {
-    this.addOption('Cancel', null);
+    this.addOption(getText('cancelAction'), null);
     this.menu.appendTo(parent);
     this.menu.elt.blur();
     this.parent = parent;
