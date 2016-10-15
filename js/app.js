@@ -58,6 +58,7 @@ App.prototype.refresh = function () {
 	var now = Date.now();
 	var timeSinceLastRefresh = now - this.lastRefresh;
 	this.lastRefresh = now;
+
 	var extraPause = timeSinceLastRefresh - this.currentFreq;
 	if (extraPause > 5 * SECOND) {
 		this.workometer.backFromSleep(extraPause);

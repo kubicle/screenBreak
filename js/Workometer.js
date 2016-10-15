@@ -16,6 +16,8 @@ function Workometer(state) {
 
 	this.level = 0;
 	this.isResting = true;
+
+	if (state.lastWorkTime) this._checkNewDay();
 }
 module.exports = Workometer;
 
