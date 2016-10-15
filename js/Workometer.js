@@ -1,5 +1,7 @@
 'use strict';
 
+var Task = require('./Task');
+
 var MINUTE = 60000, HOUR = 3600000;
 var NONSTOP_PERIOD = 60 * MINUTE;
 var REST_FOR_NONSTOP_PERIOD = 5 * MINUTE;
@@ -7,6 +9,9 @@ var NEW_DAY_BREAK = 6 * HOUR;
 
 
 function Workometer(state) {
+	this.level = 0;
+	this.isResting = true;
+
 	state = state || {};
 	this.time0 = state.lastWorkTime || 0;
 	this.taskWork = state.taskWork || 0;
@@ -14,8 +19,11 @@ function Workometer(state) {
 	this.fatigue = state.fatigue || 0;
 	this.tasks = state.tasks || {};
 
-	this.level = 0;
-	this.isResting = true;
+	if (state.curTaskName) {
+		this._loadCurTask(state.curTaskName);
+	} else {
+		this._createTask();
+	}
 
 	if (state.lastWorkTime) this._checkNewDay();
 }
@@ -28,12 +36,15 @@ Workometer.prototype.reset = function () {
 };
 
 Workometer.prototype.serialize = function () {
+	this._saveCurTask();
+
 	return {
 		lastWorkTime: this.time0,
 		taskWork: this.taskWork,
 		todaysWork: this.todaysWork,
 		fatigue: this.fatigue,
-		tasks: this.tasks
+		tasks: this.tasks,
+		curTaskName: this.curTask.name
 	};
 };
 
@@ -76,6 +87,53 @@ Workometer.prototype._countTime = function () {
 		this.fatigue += period / NONSTOP_PERIOD * REST_FOR_NONSTOP_PERIOD;
 	}
 	this.level = this.fatigue / REST_FOR_NONSTOP_PERIOD * 100;
+};
+
+Workometer.prototype._loadCurTask = function (name) {
+	this.curTask = new Task(this.tasks[name]);
+	this.taskWork = this.curTask.timeWorked;
+};
+
+Workometer.prototype._saveCurTask = function () {
+	var oldName = this.curTask.getOldName();
+	if (oldName) {
+		delete this.tasks[oldName];
+	}
+
+	this.curTask.updateTime(this.taskWork);
+	this.tasks[this.curTask.name] = this.curTask.serialize();
+};
+
+Workometer.prototype._createTask = function () {
+	this.curTask = new Task();
+	this.taskWork = 0;
+};
+
+Workometer.prototype.newTask = function (name) {
+	this._saveCurTask();
+	this._createTask();
+	if (name) this.curTask.rename(name);
+};
+
+Workometer.prototype.deleteTask = function () {
+	delete this.tasks[this.curTask.name];
+	for (var name in this.tasks) {
+		return this._loadCurTask(name);
+	}
+	this._createTask(); // create a new task if no more task exists
+};
+
+Workometer.prototype.switchTask = function (taskName) {
+	this._saveCurTask();
+	this._loadCurTask(taskName);
+};
+
+Workometer.prototype.editTaskTime = function (time) {
+	this.taskWork = time;
+};
+
+Workometer.prototype.getTaskName = function () {
+	return this.curTask.name;
 };
 
 Workometer.prototype.updateCounting = function () {
