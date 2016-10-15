@@ -32,10 +32,10 @@ var app = module.exports = new App();
 
 
 App.prototype.initialize = function () {
+	this.workometer = new Workometer(localPref.getValue('workometerState'));
+
 	this.ui = new Ui(this, this.userEventHandler.bind(this));
 	this.ui.createUi();
-
-	this.workometer = new Workometer(localPref.getValue('workometerState'));
 
 	this.refreshMethod = this.refresh.bind(this);
 	this.refreshInterval = null;
@@ -62,7 +62,7 @@ App.prototype.refresh = function () {
 		if (!this.isWorking) return this.toggle();
 	}
 
-	this.ui.refresh(this.workometer);
+	this.ui.refresh();
 
 	this.checkAlert();
 };
@@ -132,7 +132,6 @@ App.prototype.userEventHandler = function (eventName) {
 	this._noteUserIsHere();
 
 	switch (eventName) {
-	//case 'toggle': return this.toggle();
 	case 'pause': return this.goOnPause();
 	case 'ping': return this.userPing();
 	case 'reset': return this.reset();

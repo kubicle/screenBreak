@@ -8,10 +8,15 @@ var touchManager = require('./TouchManager');
 
 var MAX_COLOR_BAND = 33;
 
+var TODAY = 0, TASK = 1;
+var DISPLAY_TYPES = [TODAY, TASK];
+
 
 function Ui(app, eventHandler) {
     this.app = app;
     this.eventHandler = eventHandler;
+
+    this.curDisplay = TODAY;
 
     this.alertInterval = null;
     this.alertOn = false;
@@ -37,11 +42,12 @@ Ui.prototype._addTapBehavior = function (div, eventName) {
 
 Ui.prototype._createGauge = function (parent) {
     var gauge = this.gauge = parent.newDiv('gauge');
-    this._addTapBehavior(gauge, 'toggle');
     this.green = gauge.newDiv('colorBand green');
     this.amber = gauge.newDiv('colorBand amber');
     this.red = gauge.newDiv('colorBand red');
     this.label = gauge.newDiv('label');
+
+    touchManager.listenOn(gauge.elt, this._switchDisplay.bind(this));
 };
 
 Ui.prototype._newButton = function (parent, className, label, action) {
@@ -105,14 +111,18 @@ function ms2str(ms) {
     }
 }
 
-Ui.prototype.refresh = function (workometer) {
+Ui.prototype.refresh = function () {
+    var workometer = this.app.workometer;
     workometer.updateCounting();
 
     var text;
     if (workometer.isResting) {
         text = getText('resting') + ': ' + ms2str(workometer.getFatigue());
     } else {
-        text = ms2str(workometer.getTodaysWork());
+        switch (this.curDisplay) {
+        case TODAY: text = getText('todaysWork') + ': ' + ms2str(workometer.getTodaysWork()); break;
+        case TASK:  text = this.curTaskName + ': ' + ms2str(workometer.getTaskWork()); break;
+        }
     }
 
     this.displayGauge(workometer.getLevel(), text);
