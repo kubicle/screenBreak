@@ -5,6 +5,7 @@ var ContextMenu = require('./ContextMenu');
 var Dome = require('./Dome');
 var getText = require('./getText');
 var touchManager = require('./TouchManager');
+var util = require('./util');
 
 var MAX_COLOR_BAND = 33;
 
@@ -99,25 +100,13 @@ Ui.prototype.displayGauge = function (value, label) {
     this.label.setText(label);
 };
 
-function ms2str(ms) {
-    var min = Math.round(ms / 60000);
-    var hour = Math.floor(min / 60);
-
-    if (hour) {
-        min -= hour * 60;
-        return hour + getText('hourShort') + ('0' + min).slice(-2);
-    } else {
-        return min + getText('minuteShort');
-    }
-}
-
 Ui.prototype.refresh = function () {
     var workometer = this.app.workometer;
     workometer.updateCounting();
 
     var text;
     if (workometer.isResting) {
-        text = getText('resting') + ': ' + ms2str(workometer.getFatigue());
+        text = getText('resting') + ': ' + util.ms2str(workometer.getFatigue());
     } else {
         switch (this.curDisplay) {
         case TODAY: text = getText('todaysWork') + ': ' + ms2str(workometer.getTodaysWork()); break;
