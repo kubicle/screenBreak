@@ -1,0 +1,34 @@
+@import 'style';
+
+.nameInput {
+    margin-top: 1px;
+}
+
+.taskDlg {
+    z-index: 2000;
+    position: absolute;
+    .verticalCenter();
+    margin: 0 20%;
+    width: 60%;
+    .content {
+        padding: 20px;
+        white-space: pre-wrap;
+        word-wrap: break-word;
+    }
+    .btnDiv {
+        width: 100%;
+        display: inline-block;
+        margin: 0 0 -10px 0;
+        .okButton {
+            float: right;
+        }
+    }
+    button {
+        margin: 5px;
+        min-width: 100px;
+        height: 40px;
+        border-radius: 7px;
+        border-color: #74b5a6;
+        background-color: #aaa;
+    }
+}

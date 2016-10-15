@@ -4,6 +4,7 @@ require('./mainUi.less');
 var ContextMenu = require('./ContextMenu');
 var Dome = require('./Dome');
 var getText = require('./getText');
+var TaskDlg = require('./TaskDlg');
 var touchManager = require('./TouchManager');
 var util = require('./util');
 
@@ -66,6 +67,7 @@ Ui.prototype._showSettingsMenu = function () {
     if (!this.contextMenu) {
         cm = this.contextMenu = new ContextMenu();
         cm.addOption(getText('resetAction'), this.eventHandler.bind(this, 'reset'));
+        cm.addOption(getText('editTask'), this._showTaskDlg.bind(this));
         cm.attachMenu(this.settingsBtn);
         return;
     }
@@ -145,4 +147,19 @@ Ui.prototype.showAlert = function (numFlash) {
 
 Ui.prototype.stopAlert = function () {
     this.flashCount = 1;
+};
+
+Ui.prototype._showTaskDlg = function () {
+    var self = this;
+
+    new TaskDlg(this.app.workometer.curTask, function (action, newTime) {
+        var workometer = self.app.workometer;
+        switch (action) {
+        case 'newTask': workometer.newTask(); break;
+        case 'delTask': workometer.deleteTask(); break;
+        case 'edit': if (newTime !== undefined) workometer.editTaskTime(newTime); break;
+        default: console.error('Invalid action:', action);
+        }
+        self.refresh();
+    });
 };
