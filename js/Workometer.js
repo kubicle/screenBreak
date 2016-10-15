@@ -19,7 +19,7 @@ function Workometer(state) {
 	this.fatigue = state.fatigue || 0;
 	this.tasks = state.tasks || {};
 
-	if (state.curTaskName) {
+	if (state.curTaskName !== undefined) {
 		this._loadCurTask(state.curTaskName);
 	} else {
 		this._createTask();
