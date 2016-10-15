@@ -1,10 +1,19 @@
 {
     "pauseBtn": "Bye!",
     "pingBtn": "I am here",
-    "resetAction": "Got a break",
-    "cancelAction": "Cancel",
     "hourShort": "h",
     "minuteShort": "min",
     "todaysWork": "today",
-    "resting": "resting"
+    "unnamedTask": "task",
+    "resting": "resting",
+
+    "resetAction": "Got a break",
+    "editTask": "Task...",
+    "cancelAction": "Cancel",
+
+    "editTaskTitle": "Edit Task",
+    "newTask": "Create new task",
+    "delTask": "Delete task",
+    "taskName": "Name",
+    "taskTime": "Worked time",
 }
