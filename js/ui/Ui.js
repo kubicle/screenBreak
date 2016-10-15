@@ -28,10 +28,8 @@ module.exports = Ui;
 
 /** This is the entry point for starting the app */
 Ui.prototype.createUi = function () {
-    var title = this.app.appName;
-    Dome.setPageTitle(title);
+    Dome.setPageTitle(this.app.appName);
     var mainDiv = Dome.newDiv(document.body, 'mainDiv');
-    //mainDiv.newDiv('pageTitle').setText(title);
     this._createGauge(mainDiv);
     this._createButtons(mainDiv);
 };
