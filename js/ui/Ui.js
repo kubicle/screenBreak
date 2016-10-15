@@ -109,8 +109,13 @@ Ui.prototype.refresh = function () {
         text = getText('resting') + ': ' + util.ms2str(workometer.getFatigue());
     } else {
         switch (this.curDisplay) {
-        case TODAY: text = getText('todaysWork') + ': ' + ms2str(workometer.getTodaysWork()); break;
-        case TASK:  text = this.curTaskName + ': ' + ms2str(workometer.getTaskWork()); break;
+        case TODAY:
+            text = getText('todaysWork') + ': ' + util.ms2str(workometer.getTodaysWork());
+            break;
+        case TASK:
+            var taskName = workometer.getTaskName() || getText('unnamedTask');
+            text = taskName + ': ' + util.ms2str(workometer.getTaskWork());
+            break;
         }
     }
 
