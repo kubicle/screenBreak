@@ -1,8 +1,9 @@
 'use strict';
 
-var NONSTOP_PERIOD = 60 * 60000;
-var REST_FOR_NONSTOP_PERIOD = 5 * 60000;
-var NEW_DAY_BREAK = 6 * 60 * 60000;
+var MINUTE = 60000, HOUR = 360000;
+var NONSTOP_PERIOD = 60 * MINUTE;
+var REST_FOR_NONSTOP_PERIOD = 5 * MINUTE;
+var NEW_DAY_BREAK = 6 * HOUR;
 
 
 function Workometer(state) {
