@@ -21,8 +21,6 @@
         "height": 50,
         "position": "center",
         "min_width": 233,
-        "min_height": 50,
-        "max_width": 408,
-        "max_height": 90
+        "min_height": 50
     }
 }

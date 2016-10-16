@@ -4,6 +4,7 @@ require('./mainUi.less');
 var ContextMenu = require('./ContextMenu');
 var Dome = require('./Dome');
 var getText = require('./getText');
+var nwUtil = require('../nwUtil');
 var TaskDlg = require('./TaskDlg');
 var touchManager = require('./TouchManager');
 var util = require('./util');
@@ -69,12 +70,14 @@ Ui.prototype._showSettingsMenu = function () {
         cm.addOption(getText('resetAction'), this.eventHandler.bind(this, 'reset'));
         cm.addOption(getText('taskAction'), this._showTaskMenu.bind(this));
         cm.attachMenu(this.settingsBtn);
+        nwUtil.showElement(cm.menu.elt);
         return;
     }
     if (cm.isVisible()) {
         cm.setVisible(false);
     } else {
         cm.setVisible(true);
+        nwUtil.showElement(cm.menu.elt);
     }
 };
 
@@ -98,6 +101,7 @@ Ui.prototype._showTaskMenu = function () {
     }
 
     cm.attachMenu(this.settingsBtn);
+    nwUtil.showElement(cm.menu.elt);
 };
 
 Ui.prototype.setWorking = function (isWorking) {
@@ -177,5 +181,6 @@ Ui.prototype.stopAlert = function () {
 };
 
 Ui.prototype._showTaskDlg = function (mode) {
-    new TaskDlg(mode, this, this.refresh.bind(this));
+    var dlg = new TaskDlg(mode, this, this.refresh.bind(this));
+    nwUtil.showElement(dlg.dialogRoot.elt);
 };
