@@ -1,0 +1,29 @@
+
+@dialogBg: #ddd;
+@dialogColor: #000;
+@dlgTitleBg: #ccc;
+@dlgTitleColor: #000;
+
+
+.noDrag() {
+    -webkit-app-region: no-drag;
+}
+
+.noSelect() {
+  -webkit-touch-callout: none; /* iOS Safari */
+  -webkit-user-select: none;   /* Chrome/Safari/Opera */
+  -moz-user-select: none;      /* Firefox */
+  -ms-user-select: none;       /* Internet Explorer/Edge */
+  user-select: none;           /* Non-prefixed version, currently not supported by any browser */
+}
+
+// Needs element & its parent to have "position" relative or absolute
+.verticalCenter() {
+    top: 50%;
+    .transform(translateY(-50%));
+}
+
+.transform(@t) {
+    -webkit-transform: @t;
+    transform: @t;
+}

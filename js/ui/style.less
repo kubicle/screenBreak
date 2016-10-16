@@ -1,18 +1,26 @@
+@import 'mixins';
+
 body {
-	-webkit-app-region: drag;
-	background-color: #303030;
-	font-family: "Arial";
-	margin: 5px;
+    -webkit-app-region: drag;
+    background-color: #303030;
+    font-family: "Arial";
+    font-size: 16px;
+    margin: 5px;
 }
 
-.noDrag() {
-	-webkit-app-region: no-drag;
+.dialog {
+    padding: 10px;
+    background-color: @dialogBg;
+    color: @dialogColor;
+    border: solid 1px #2fcec7;
+    border-radius: 7px;
 }
-
-.noSelect() {
-  -webkit-touch-callout: none; /* iOS Safari */
-  -webkit-user-select: none;   /* Chrome/Safari/Opera */
-  -moz-user-select: none;      /* Firefox */
-  -ms-user-select: none;       /* Internet Explorer/Edge */
-  user-select: none;           /* Non-prefixed version, currently not supported by any browser */
+.dialogTitle {
+    font-size: 30px;
+    background-color: @dlgTitleBg;
+    color: @dlgTitleColor;
+    border: 1px solid #afafaf;
+    border-radius: 7px;
+    margin: -6px;
+    padding: 3px 0px 3px 6px;
 }
