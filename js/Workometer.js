@@ -10,10 +10,10 @@ var NEW_DAY_BREAK = 6 * HOUR;
 
 function Workometer(state) {
 	this.level = 0;
-	this.isResting = true;
+	this.isResting = true; // created in "resting" state; we will be starting work right away
 
 	state = state || {};
-	this.time0 = state.lastWorkTime || 0;
+	this.time0 = state.lastWorkTime || Date.now();
 	this.taskWork = state.taskWork || 0;
 	this.todaysWork = state.todaysWork || 0;
 	this.fatigue = state.fatigue || 0;
@@ -24,8 +24,6 @@ function Workometer(state) {
 	} else {
 		this._createTask();
 	}
-
-	if (state.lastWorkTime) this._checkNewDay();
 }
 module.exports = Workometer;
 
@@ -55,7 +53,9 @@ Workometer.prototype._checkNewDay = function () {
 };
 
 Workometer.prototype.start = function () {
+	if (!this.isResting) return;
 	this._checkNewDay();
+	this._countTime();
 	this.time0 = Date.now();
 	this.isResting = false;
 };
