@@ -8,10 +8,10 @@ var util = require('./util');
 function TaskDlg(mode, ui, cb) {
     var isNewMode = mode === 'new';
     this.workometer = ui.app.workometer;
-    this.task = this.workometer.curTask;
+    this.task = this.workometer.getTask();
     this.cb = cb;
-    this.oldName = this.task.name;
-    this.oldTime = util.ms2str(this.task.timeWorked);
+    this.oldName = this.task.getName();
+    this.oldTime = util.ms2str(this.task.getTimeWorked());
 
     this.parent = document.body;
     this.dialogRoot = Dome.newDiv(this.parent);

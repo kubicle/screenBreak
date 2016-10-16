@@ -90,6 +90,8 @@ Workometer.prototype._countTime = function () {
 	this.level = this.fatigue / REST_FOR_NONSTOP_PERIOD * 100;
 };
 
+//--- Task management
+
 Workometer.prototype._loadCurTask = function (name) {
 	this.curTask = new Task(this.tasks[name]);
 	this.taskWork = this.curTask.timeWorked;
@@ -130,29 +132,27 @@ Workometer.prototype.switchTask = function (taskName) {
 };
 
 Workometer.prototype.editTaskTime = function (time) {
+	this.curTask.updateTime(time);
 	this.taskWork = time;
 };
 
-Workometer.prototype.getTaskName = function () {
-	return this.curTask.name;
+Workometer.prototype.getTask = function () {
+	return this.curTask;
 };
 
-Workometer.prototype.updateCounting = function () {
+//---
+
+Workometer.prototype.getStatus = function (status) {
 	this._countTime();
+
+	status.isResting = this.isResting;
+	status.taskName = this.curTask.name;
+	status.taskWork = this.taskWork;
+	status.todaysWork = this.todaysWork;
+	status.fatigue = this.fatigue;
+	status.level = this.level;
 };
 
 Workometer.prototype.getLevel = function () {
 	return this.level;
-};
-
-Workometer.prototype.getTodaysWork = function () {
-	return this.todaysWork;
-};
-
-Workometer.prototype.getTaskWork = function () {
-	return this.taskWork;
-};
-
-Workometer.prototype.getFatigue = function () {
-	return this.fatigue;
 };

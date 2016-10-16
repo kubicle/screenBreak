@@ -102,25 +102,25 @@ Ui.prototype.displayGauge = function (value, label) {
 };
 
 Ui.prototype.refresh = function () {
-    var workometer = this.app.workometer;
-    workometer.updateCounting();
+    var status = this.workStatus || {};
+    this.app.workometer.getStatus(status);
 
     var text;
-    if (workometer.isResting) {
-        text = getText('resting') + ': ' + util.ms2str(workometer.getFatigue());
+    if (status.isResting) {
+        text = getText('resting') + ': ' + util.ms2str(status.fatigue);
     } else {
         switch (this.curDisplay) {
         case TODAY:
-            text = getText('todaysWork') + ': ' + util.ms2str(workometer.getTodaysWork());
+            text = getText('todaysWork') + ': ' + util.ms2str(status.todaysWork);
             break;
         case TASK:
-            var taskName = workometer.getTaskName() || getText('unnamedTask');
-            text = taskName + ': ' + util.ms2str(workometer.getTaskWork());
+            var taskName = status.taskName || getText('unnamedTask');
+            text = taskName + ': ' + util.ms2str(status.taskWork);
             break;
         }
     }
 
-    this.displayGauge(workometer.getLevel(), text);
+    this.displayGauge(status.level, text);
 };
 
 Ui.prototype._switchDisplay = function () {

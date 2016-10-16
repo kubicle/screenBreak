@@ -20,6 +20,14 @@ Task.prototype.serialize = function () {
     };
 };
 
+Task.prototype.getName = function () {
+    return this.name;
+};
+
+Task.prototype.getTimeWorked = function () {
+    return this.timeWorked;
+};
+
 Task.prototype.updateTime = function (time) {
     this.timeWorked = time;
 };
