@@ -20,4 +20,5 @@
     "delTask": "Delete task",
     "taskName": "Name",
     "taskTime": "Worked time",
+    "invalidValue": "Invalid value",
 }

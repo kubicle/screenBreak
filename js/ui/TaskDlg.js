@@ -57,7 +57,7 @@ TaskDlg.prototype._validate = function (action) {
         var newTime = this.time.value();
         if (newTime !== this.oldTime) {
             var newTimeMs = util.str2ms(newTime);
-            if (!newTimeMs && newTimeMs !== 0) return; // TODO show error msg
+            if (!newTimeMs && newTimeMs !== 0) return alert(getText('invalidValue') + ': ' + newTime); // TODO show error msg
             this.workometer.editTaskTime(newTimeMs);
         }
         break;
@@ -65,6 +65,7 @@ TaskDlg.prototype._validate = function (action) {
         this.workometer.newTask(newName);
         break;
     case 'delTask':
+        if (!confirm(getText('delTask') + ': ' + this.oldName + '?')) return;
         this.workometer.deleteTask();
         break;
     case 'cancel':
