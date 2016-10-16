@@ -67,7 +67,8 @@ Ui.prototype._showSettingsMenu = function () {
     if (!this.contextMenu) {
         cm = this.contextMenu = new ContextMenu();
         cm.addOption(getText('resetAction'), this.eventHandler.bind(this, 'reset'));
-        cm.addOption(getText('editTask'), this._showTaskDlg.bind(this));
+        cm.addOption(getText('newTaskAction'), this._showTaskDlg.bind(this, 'new'));
+        cm.addOption(getText('editTaskAction'), this._showTaskDlg.bind(this, 'edit'));
         cm.attachMenu(this.settingsBtn);
         return;
     }
@@ -154,17 +155,6 @@ Ui.prototype.stopAlert = function () {
     this.flashCount = 1;
 };
 
-Ui.prototype._showTaskDlg = function () {
-    var self = this;
-
-    new TaskDlg(this.app.workometer.curTask, function (action, newTime) {
-        var workometer = self.app.workometer;
-        switch (action) {
-        case 'newTask': workometer.newTask(); break;
-        case 'delTask': workometer.deleteTask(); break;
-        case 'edit': if (newTime !== undefined) workometer.editTaskTime(newTime); break;
-        default: console.error('Invalid action:', action);
-        }
-        self.refresh();
-    });
+Ui.prototype._showTaskDlg = function (mode) {
+    new TaskDlg(mode, this, this.refresh.bind(this));
 };

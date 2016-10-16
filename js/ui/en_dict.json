@@ -8,10 +8,13 @@
     "resting": "resting",
 
     "resetAction": "Got a break",
-    "editTask": "Task...",
+    "newTaskAction": "New task...",
+    "editTaskAction": "Edit task...",
     "cancelAction": "Cancel",
 
+    "OK": "OK",
     "editTaskTitle": "Edit Task",
+    "newTaskTitle": "New Task",
     "newTask": "Create new task",
     "delTask": "Delete task",
     "taskName": "Name",

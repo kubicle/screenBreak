@@ -5,48 +5,75 @@ var getText = require('./getText');
 var util = require('./util');
 
 
-function TaskDlg(task, cb) {
-    this.task = task;
+function TaskDlg(mode, ui, cb) {
+    var isNewMode = mode === 'new';
+    this.workometer = ui.app.workometer;
+    this.task = this.workometer.curTask;
     this.cb = cb;
+    this.oldName = this.task.name;
+    this.oldTime = util.ms2str(this.task.timeWorked);
+
     this.parent = document.body;
     this.dialogRoot = Dome.newDiv(this.parent);
 
     var dialog = this.dialog = this.dialogRoot.newDiv('taskDlg dialog');
-    dialog.newDiv('dialogTitle').setText(getText('editTaskTitle'));
+    dialog.newDiv('dialogTitle').setText(isNewMode ? getText('newTaskTitle') : getText('editTaskTitle'));
 
     var content = dialog.newDiv('content');
 
-    var btn = Dome.newButton(content, 'newTask', getText('newTask'), this._validate.bind(this, 'newTask'));
-    btn.dlg = this;
-    btn = Dome.newButton(content, 'delTask', getText('delTask'), this._validate.bind(this, 'delTask'));
-    btn.dlg = this;
-
-    this.oldName = task.name;
-    this.oldTime = util.ms2str(task.timeWorked);
     this.name = Dome.newInput(content, 'name', getText('taskName') + ':', this.oldName);
-    this.time = Dome.newInput(content, 'time', getText('taskTime') + ':', this.oldTime);
+    if (!isNewMode) this.time = Dome.newInput(content, 'time', getText('taskTime') + ':', this.oldTime);
 
     var btnDiv = dialog.newDiv('btnDiv');
-    btn = Dome.newButton(btnDiv, 'ok', 'OK', this._validate.bind(this, 'edit'));
-    btn.dlg = this;
+    if (isNewMode) this._newButton(btnDiv, 'newTask', getText('newTask'));
+    if (!isNewMode) this._newButton(btnDiv, 'delTask', getText('delTask'));
+    if (!isNewMode) this._newButton(btnDiv, 'edit', getText('OK'));
+    this._newButton(btnDiv, 'cancel', getText('cancelAction'));
 
     this.dialogRoot.appendTo(this.parent);
 }
 module.exports = TaskDlg;
 
 
+function btnHandler() {
+    this.dlg._validate(this.action);
+}
+
+TaskDlg.prototype._newButton = function (parent, action, label) {
+    var btn = Dome.newButton(parent, action, label, btnHandler);
+    btn.action = action;
+    btn.dlg = this;
+};
+
 TaskDlg.prototype._validate = function (action) {
-    Dome.removeChild(this.parent, this.dialogRoot);
+    var newName = this.name.value();
 
-    if (action === 'edit') {
-        var newName = this.name.value();
-        if (newName !== this.oldName) this.task.rename(newName);
-
+    switch (action) {
+    case 'edit':
+        if (newName !== this.oldName) {
+            this.task.rename(newName);
+        }
         var newTime = this.time.value();
         if (newTime !== this.oldTime) {
-            return this.cb(action, util.str2ms(newTime));
+            var newTimeMs = util.str2ms(newTime);
+            if (!newTimeMs && newTimeMs !== 0) return; // TODO show error msg
+            this.workometer.editTaskTime(newTimeMs);
         }
+        break;
+    case 'newTask':
+        this.workometer.newTask(newName);
+        break;
+    case 'delTask':
+        this.workometer.deleteTask();
+        break;
+    case 'cancel':
+        break;
     }
 
-    this.cb(action);
+    this._close();
+};
+
+TaskDlg.prototype._close = function () {
+    Dome.removeChild(this.parent, this.dialogRoot);
+    this.cb();
 };
