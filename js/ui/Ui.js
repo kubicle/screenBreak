@@ -102,7 +102,7 @@ Ui.prototype.displayGauge = function (value, label) {
 };
 
 Ui.prototype.refresh = function () {
-    var status = this.workStatus || {};
+    var status = this.workStatus = this.workStatus || {};
     this.app.workometer.getStatus(status);
 
     var text;
