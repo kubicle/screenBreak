@@ -5,7 +5,9 @@ var Dome = require('./Dome');
 var getText = require('./getText');
 
 
-function ContextMenu() {
+function ContextMenu(params) {
+    this.isPersistent = !!params && params.isPersistent;
+
     this.options = [];
     this.menu = Dome.newDiv(null, 'contextMenu');
 }
@@ -23,6 +25,7 @@ ContextMenu.prototype.addOption = function(label, action) {
     option.contextMenu = this;
     Dome.tapBehavior(option, tapHandler);
     this.options.push(option);
+    return option;
 };
 
 ContextMenu.prototype.attachMenu = function(parent) {
@@ -38,7 +41,11 @@ ContextMenu.prototype.detachMenu = function() {
 };
 
 ContextMenu.prototype._close = function () {
-    this.menu.setVisible(false);
+    if (this.isPersistent) {
+        this.menu.setVisible(false);
+    } else {
+        this.detachMenu();
+    }
 };
 
 ContextMenu.prototype.setVisible = function(shouldShow) {

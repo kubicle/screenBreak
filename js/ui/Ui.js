@@ -65,10 +65,9 @@ Ui.prototype._createButtons = function (parent) {
 Ui.prototype._showSettingsMenu = function () {
     var cm = this.contextMenu;
     if (!this.contextMenu) {
-        cm = this.contextMenu = new ContextMenu();
+        cm = this.contextMenu = new ContextMenu({ isPersistent: true });
         cm.addOption(getText('resetAction'), this.eventHandler.bind(this, 'reset'));
-        cm.addOption(getText('newTaskAction'), this._showTaskDlg.bind(this, 'new'));
-        cm.addOption(getText('editTaskAction'), this._showTaskDlg.bind(this, 'edit'));
+        cm.addOption(getText('taskAction'), this._showTaskMenu.bind(this));
         cm.attachMenu(this.settingsBtn);
         return;
     }
@@ -77,6 +76,28 @@ Ui.prototype._showSettingsMenu = function () {
     } else {
         cm.setVisible(true);
     }
+};
+
+function taskSwitchHandler() {
+    // "this" is the menu option
+    var self = this.ui;
+    self.app.workometer.switchTask(this.taskName);
+    self.refresh();
+}
+
+Ui.prototype._showTaskMenu = function () {
+    var cm = new ContextMenu();
+    cm.addOption(getText('newTaskAction'), this._showTaskDlg.bind(this, 'new'));
+    cm.addOption(getText('editTaskAction'), this._showTaskDlg.bind(this, 'edit'));
+
+    var workometer = this.app.workometer;
+    for (var name in workometer.tasks) {
+        var option = cm.addOption(name || getText('unnamedTask'), taskSwitchHandler);
+        option.ui = this;
+        option.taskName = name;
+    }
+
+    cm.attachMenu(this.settingsBtn);
 };
 
 Ui.prototype.setWorking = function (isWorking) {

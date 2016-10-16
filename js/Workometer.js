@@ -111,6 +111,7 @@ Workometer.prototype.newTask = function (name) {
 	this._saveCurTask();
 	this._createTask();
 	if (name) this.curTask.rename(name);
+	this._saveCurTask();
 };
 
 Workometer.prototype.deleteTask = function () {

@@ -8,6 +8,7 @@
     "resting": "resting",
 
     "resetAction": "Got a break",
+    "taskAction": "Tasks...",
     "newTaskAction": "New task...",
     "editTaskAction": "Edit task...",
     "cancelAction": "Cancel",
