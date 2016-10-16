@@ -10,7 +10,7 @@ function TaskDlg(mode, ui, cb) {
     this.workometer = ui.app.workometer;
     this.task = this.workometer.getTask();
     this.cb = cb;
-    this.oldName = this.task.getName();
+    this.oldName = isNewMode ? '' : this.task.getName();
     this.oldTime = util.ms2str(this.task.getTimeWorked());
 
     this.parent = document.body;
@@ -31,6 +31,7 @@ function TaskDlg(mode, ui, cb) {
     this._newButton(btnDiv, 'cancel', getText('cancelAction'));
 
     this.dialogRoot.appendTo(this.parent);
+    this.name.elt.focus();
 }
 module.exports = TaskDlg;
 
@@ -51,7 +52,7 @@ TaskDlg.prototype._validate = function (action) {
     switch (action) {
     case 'edit':
         if (newName !== this.oldName) {
-            this.task.rename(newName);
+            this.workometer.renameTask(newName);
         }
         var newTime = this.time.value();
         if (newTime !== this.oldTime) {

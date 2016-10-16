@@ -98,11 +98,6 @@ Workometer.prototype._loadCurTask = function (name) {
 };
 
 Workometer.prototype._saveCurTask = function () {
-	var oldName = this.curTask.getOldName();
-	if (oldName) {
-		delete this.tasks[oldName];
-	}
-
 	this.curTask.updateTime(this.taskWork);
 	this.tasks[this.curTask.name] = this.curTask.serialize();
 };
@@ -129,6 +124,11 @@ Workometer.prototype.deleteTask = function () {
 Workometer.prototype.switchTask = function (taskName) {
 	this._saveCurTask();
 	this._loadCurTask(taskName);
+};
+
+Workometer.prototype.renameTask = function (newName) {
+	delete this.tasks[this.curTask.name];
+	this.curTask.rename(newName);
 };
 
 Workometer.prototype.editTaskTime = function (time) {
