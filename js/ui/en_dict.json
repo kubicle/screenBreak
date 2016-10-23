@@ -4,7 +4,7 @@
     "hourShort": "h",
     "minuteShort": "min",
     "todaysWork": "today",
-    "unnamedTask": "task",
+    "unnamedTask": "(default task)",
     "resting": "resting",
 
     "resetAction": "Got a break",

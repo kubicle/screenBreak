@@ -27,7 +27,7 @@ function TaskDlg(mode, ui, cb) {
 
     var btnDiv = dialog.newDiv('btnDiv');
     if (isNewMode) this._newButton(btnDiv, 'newTask', getText('newTask'));
-    if (!isNewMode) this._newButton(btnDiv, 'delTask', getText('delTask'));
+    if (!isNewMode && this.oldName) this._newButton(btnDiv, 'delTask', getText('delTask'));
     if (!isNewMode) this._newButton(btnDiv, 'edit', getText('OK'));
     this._newButton(btnDiv, 'cancel', getText('cancelAction'));
 
@@ -53,7 +53,7 @@ TaskDlg.prototype._validate = function (action) {
 
     switch (action) {
     case 'edit':
-        if (newName !== this.oldName) {
+        if (newName && newName !== this.oldName) {
             this.workometer.renameTask(newName);
         }
         var newTime = this.time.value();
