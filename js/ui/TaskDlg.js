@@ -2,6 +2,7 @@
 require('./taskDlg.less');
 var Dome = require('./Dome');
 var getText = require('./getText');
+var PopupDlg = require('./PopupDlg');
 var util = require('./util');
 
 
@@ -14,7 +15,7 @@ function TaskDlg(mode, ui, cb) {
     this.oldTime = util.ms2str(this.task.getTimeWorked());
 
     this.parent = document.body;
-    this.dialogRoot = Dome.newDiv(this.parent);
+    this.dialogRoot = PopupDlg.newOverlay();
 
     var dialog = this.dialog = this.dialogRoot.newDiv('taskDlg dialog');
     dialog.newDiv('dialogTitle').setText(isNewMode ? getText('newTaskTitle') : getText('editTaskTitle'));
@@ -31,6 +32,7 @@ function TaskDlg(mode, ui, cb) {
     this._newButton(btnDiv, 'cancel', getText('cancelAction'));
 
     this.dialogRoot.appendTo(this.parent);
+    this.dialog.appendTo(this.dialogRoot, /*isFloating=*/true);
     this.name.elt.focus();
 }
 module.exports = TaskDlg;
@@ -57,7 +59,9 @@ TaskDlg.prototype._validate = function (action) {
         var newTime = this.time.value();
         if (newTime !== this.oldTime) {
             var newTimeMs = util.str2ms(newTime);
-            if (!newTimeMs && newTimeMs !== 0) return alert(getText('invalidValue') + ': ' + newTime); // TODO show error msg
+            if (!newTimeMs && newTimeMs !== 0) {
+                return new PopupDlg(this.dialog, getText('invalidValue') + ': ' + newTime);
+            }
             this.workometer.editTaskTime(newTimeMs);
         }
         break;
@@ -65,9 +69,14 @@ TaskDlg.prototype._validate = function (action) {
         this.workometer.newTask(newName);
         break;
     case 'delTask':
-        if (!confirm(getText('delTask') + ': ' + this.oldName + '?')) return;
-        this.workometer.deleteTask();
-        break;
+        var question = getText('delTask') + ': ' + this.oldName + '?';
+        var options = { buttons: [getText('cancelAction'), getText('OK')] };
+        var self = this;
+        return new PopupDlg(this.dialog, question, getText('confirmTitle'), options, function (options) {
+            if (!options.choice) return; 
+            self.workometer.deleteTask();
+            self._close();
+        });
     case 'cancel':
         break;
     }
@@ -76,6 +85,7 @@ TaskDlg.prototype._validate = function (action) {
 };
 
 TaskDlg.prototype._close = function () {
+    this.dialog.setVisible(false);
     Dome.removeChild(this.parent, this.dialogRoot);
     this.cb();
 };

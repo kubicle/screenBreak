@@ -21,6 +21,8 @@ var ANNOYING_ALERT_REPEAT_DELAY = 10 * MINUTE; // you can make the annoying aler
 
 
 function App() {
+	nwUtil.initialize();
+
 	this.appName = pkg.name;
 	this.appVersion = pkg.version;
 
@@ -30,7 +32,7 @@ function App() {
 	this.currentFreq = 0;
 }
 
-var app = module.exports = new App();
+var app = new App();
 
 
 App.prototype.initialize = function () {
@@ -52,6 +54,7 @@ App.prototype.terminate = function () {
 	this.workometer.stop();
 	localPref.setValue('workometerState', this.workometer.serialize());
 	localPref.terminate();
+	nwUtil.terminate();
 };
 
 App.prototype.refresh = function () {
@@ -138,6 +141,7 @@ App.prototype.userEventHandler = function (eventName) {
 	case 'pause': return this.goOnPause();
 	case 'ping': return this.userPing();
 	case 'reset': return this.reset();
+	case 'exit': return this.terminate();
 	}
 };
 

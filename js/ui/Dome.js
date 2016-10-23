@@ -1,6 +1,7 @@
 'use strict';
 /* eslint no-console: 0 */
 
+var arranger = null;
 var painter = null;
 var curGroup = null;
 var uniqueId = 1;
@@ -8,9 +9,11 @@ var uniqueId = 1;
 
 /**
  * @param {Painter} [aPainter]
+ * @param {Arranger} [anArranger]
  */
-Dome.init = function (aPainter) {
+Dome.init = function (aPainter, anArranger) {
     painter = aPainter;
+    arranger = anArranger;
 };
 
 /**
@@ -22,6 +25,8 @@ Dome.init = function (aPainter) {
 function Dome(parent, type, className, name) {
     this.type = type;
     var elt = this.elt = document.createElement(type);
+    this.isFloating = false;
+
     if (name && name[0] === '#') {
         curGroup.add(name.substr(1), this);
         // Some class names are built from name so "#" could be in className too
@@ -36,9 +41,19 @@ function Dome(parent, type, className, name) {
 module.exports = Dome;
 
 
-Dome.prototype.appendTo = function (parent) {
+Dome.prototype.appendTo = function (parent, isFloating) {
     (parent instanceof Dome ? parent.elt : parent).appendChild(this.elt);
+
+    this.isFloating = isFloating;
+    if (arranger && isFloating) arranger.addElement(this.elt);
 };
+
+Dome.removeChild = function (parent, dome) {
+    if (arranger && dome.isFloating) arranger.removeElement(dome.elt);
+    if (parent instanceof Dome) parent = parent.elt;
+    parent.removeChild(dome.elt);
+};
+Dome.prototype.removeChild = function (child) { Dome.removeChild(this, child); };
 
 
 // Setters
@@ -52,6 +67,10 @@ Dome.prototype.setVisible = function (show) {
     if (show === this.isVisible()) return this;
     this.elt.style.display = show ? '' : 'none';
     this._isVisible = !!show;
+    if (arranger && this.isFloating) {
+        if (show) arranger.addElement(this.elt);
+        else arranger.removeElement(this.elt);
+    }
     return this;
 };
 
@@ -107,12 +126,6 @@ Dome.newDiv = function (parent, className, name) {
 Dome.prototype.newDiv = function (className, name) {
     return new Dome(this, 'div', className, name || className);
 };
-
-Dome.removeChild = function (parent, dome) {
-    if (parent instanceof Dome) parent = parent.elt;
-    parent.removeChild(dome.elt);
-};
-Dome.prototype.removeChild = function (child) { this.elt.removeChild(child.elt); };
 
 Dome.newButton = function (parent, name, label, action) {
     var button = new Dome(parent, 'button', name + 'Button', name);
@@ -229,6 +242,20 @@ Dome.newDropdown = function (parent, name, labels, values, init) {
 Dome.prototype.select = function (value) {
     var ndx = this.values.indexOf(value);
     if (ndx !== -1) this.elt.selectedIndex = ndx;
+};
+
+//---Rect helpers
+
+function Rect(left, top, width, height) {
+    this.left = left;
+    this.top = top;
+    this.width = width;
+    this.height = height;
+}
+
+Dome.getRect = function (eltOrDome) {
+    var r = (eltOrDome.elt || eltOrDome).getBoundingClientRect();
+    return new Rect(r.left, r.top, r.width, r.height);
 };
 
 //---Group helpers

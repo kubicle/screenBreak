@@ -1,6 +1,7 @@
 @import 'mixins';
 
 body {
+    .noSelect();
     -webkit-app-region: drag;
     background-color: #303030;
     font-family: "Arial";
@@ -12,7 +13,6 @@ body {
     padding: 10px;
     background-color: @dialogBg;
     color: @dialogColor;
-    border: solid 1px #2fcec7;
     border-radius: 7px;
 }
 .dialogTitle {
@@ -21,6 +21,6 @@ body {
     color: @dlgTitleColor;
     border: 1px solid #afafaf;
     border-radius: 7px;
-    margin: -6px;
+    margin: -6px -6px 0px -6px;
     padding: 3px 0px 3px 6px;
 }

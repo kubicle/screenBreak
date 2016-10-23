@@ -24,6 +24,8 @@ function Ui(app, eventHandler) {
     this.alertInterval = null;
     this.alertOn = false;
     this.flashCount = 0;
+
+    Dome.init(null, nwUtil.getArranger());
 }
 module.exports = Ui;
 
@@ -64,21 +66,11 @@ Ui.prototype._createButtons = function (parent) {
 };
 
 Ui.prototype._showSettingsMenu = function () {
-    var cm = this.contextMenu;
-    if (!this.contextMenu) {
-        cm = this.contextMenu = new ContextMenu({ isPersistent: true });
-        cm.addOption(getText('resetAction'), this.eventHandler.bind(this, 'reset'));
-        cm.addOption(getText('taskAction'), this._showTaskMenu.bind(this));
-        cm.attachMenu(this.settingsBtn);
-        nwUtil.showElement(cm.menu.elt);
-        return;
-    }
-    if (cm.isVisible()) {
-        cm.setVisible(false);
-    } else {
-        cm.setVisible(true);
-        nwUtil.showElement(cm.menu.elt);
-    }
+    var cm = new ContextMenu();
+    cm.addOption(getText('resetAction'), this.eventHandler.bind(this, 'reset'));
+    cm.addOption(getText('taskAction'), this._showTaskMenu.bind(this));
+    if (nwUtil.isNw()) cm.addOption(getText('exitAction'), this.eventHandler.bind(this, 'exit'));
+    cm.attachMenu(this.settingsBtn);
 };
 
 function taskSwitchHandler() {
@@ -101,7 +93,6 @@ Ui.prototype._showTaskMenu = function () {
     }
 
     cm.attachMenu(this.settingsBtn);
-    nwUtil.showElement(cm.menu.elt);
 };
 
 Ui.prototype.setWorking = function (isWorking) {
@@ -181,6 +172,5 @@ Ui.prototype.stopAlert = function () {
 };
 
 Ui.prototype._showTaskDlg = function (mode) {
-    var dlg = new TaskDlg(mode, this, this.refresh.bind(this));
-    nwUtil.showElement(dlg.dialogRoot.elt);
+    new TaskDlg(mode, this, this.refresh.bind(this));
 };

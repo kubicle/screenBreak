@@ -3,13 +3,15 @@
 require('./contextMenu.less');
 var Dome = require('./Dome');
 var getText = require('./getText');
+var PopupDlg = require('./PopupDlg');
 
 
-function ContextMenu(params) {
-    this.isPersistent = !!params && params.isPersistent;
-
+function ContextMenu() {
     this.options = [];
-    this.menu = Dome.newDiv(null, 'contextMenu');
+
+    this.parent = document.body;
+    this.menuRoot = PopupDlg.newOverlay();
+    this.menu = Dome.newDiv(this.menuRoot, 'contextMenu');
 }
 module.exports = ContextMenu;
 
@@ -28,30 +30,32 @@ ContextMenu.prototype.addOption = function(label, action) {
     return option;
 };
 
-ContextMenu.prototype.attachMenu = function(parent) {
+// NB: we don't actually attach to target but use it to position the menu
+ContextMenu.prototype.attachMenu = function(target) {
     this.addOption(getText('cancelAction'), null);
-    this.menu.appendTo(parent);
-    this.menu.elt.blur();
-    this.parent = parent;
+
+    var r = Dome.getRect(target);
+    this.menu.setStyle('left', r.left + r.width / 2 + 'px');
+    this.menu.setStyle('top', r.top + r.height / 2 + 'px');
+
+    this.menuRoot.appendTo(this.parent);
+    this.menu.appendTo(this.menuRoot, /*isFloating=*/true);
+    this.menuRoot.elt.blur();
 };
 
 ContextMenu.prototype.detachMenu = function() {
-    Dome.removeChild(this.parent, this.menu);
-    this.parent = null;
+    this.menu.setVisible(false);
+    Dome.removeChild(this.parent, this.menuRoot);
 };
 
 ContextMenu.prototype._close = function () {
-    if (this.isPersistent) {
-        this.menu.setVisible(false);
-    } else {
-        this.detachMenu();
-    }
+    this.detachMenu();
 };
 
 ContextMenu.prototype.setVisible = function(shouldShow) {
-    this.menu.setVisible(shouldShow);
+    this.menuRoot.setVisible(shouldShow);
 };
 
 ContextMenu.prototype.isVisible = function() {
-    return this.menu.isVisible();
+    return this.menuRoot.isVisible();
 };

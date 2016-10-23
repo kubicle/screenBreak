@@ -1,0 +1,31 @@
+@import "mixins";
+
+.popupOverlay {
+    z-index: 2000;
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.4);
+}
+
+.popupDlg {
+    position: relative;
+    .verticalCenter();
+    margin: 0 auto;
+    width: 305px;
+    .content {
+        padding: 20px;
+        white-space: pre-wrap;
+        word-wrap: break-word;
+    }
+    .btnDiv {
+        width: 100%;
+        display: inline-block;
+        margin: -10px 0 -10px 0;
+        .popupDlgButton {
+            float: right;
+        }
+    }
+}

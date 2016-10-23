@@ -9,9 +9,11 @@
 
     "resetAction": "Got a break",
     "taskAction": "Tasks...",
+    "exitAction": "Exit",
     "newTaskAction": "New task...",
     "editTaskAction": "Edit task...",
     "cancelAction": "Cancel",
+    "confirmTitle": "Confirm",
 
     "OK": "OK",
     "editTaskTitle": "Edit Task",
@@ -21,4 +23,5 @@
     "taskName": "Name",
     "taskTime": "Worked time",
     "invalidValue": "Invalid value",
+    "problem": "Problem",
 }
