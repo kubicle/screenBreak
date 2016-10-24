@@ -13,7 +13,7 @@ function Workometer(state) {
 	this.isResting = true; // created in "resting" state; we will be starting work right away
 
 	state = state || {};
-	this.time0 = state.lastWorkTime || Date.now();
+	this.time0 = this.lastWorkTime = state.lastWorkTime || Date.now();
 	this.taskWork = state.taskWork || 0;
 	this.todaysWork = state.todaysWork || 0;
 	this.fatigue = state.fatigue || 0;
@@ -47,7 +47,7 @@ Workometer.prototype.serialize = function () {
 };
 
 Workometer.prototype._checkNewDay = function () {
-	if (Date.now() - this.time0 > NEW_DAY_BREAK) {
+	if (Date.now() - this.lastWorkTime > NEW_DAY_BREAK) {
 		this.todaysWork = 0;
 	}
 };
@@ -56,14 +56,14 @@ Workometer.prototype.start = function () {
 	if (!this.isResting) return;
 	this._checkNewDay();
 	this._countTime();
-	this.time0 = Date.now();
+	this.time0 = this.lastWorkTime = Date.now();
 	this.isResting = false;
 };
 
 // Called when we did not "stop" but timers could not fire (computer went on pause)
 Workometer.prototype.backFromSleep = function (pause) {
 	this._checkNewDay();
-	this.time0 = Date.now();
+	this.time0 = this.lastWorkTime = Date.now();
 	this.fatigue = Math.max(this.fatigue - pause, 0);
 	// NB: no need to adjust time counting since _countTime was not called during the pause
 };
@@ -71,7 +71,7 @@ Workometer.prototype.backFromSleep = function (pause) {
 Workometer.prototype.stop = function () {
 	if (this.isResting) return;
 	this._countTime();
-	this.time0 = Date.now();
+	this.time0 = this.lastWorkTime = Date.now();
 	this.isResting = true;
 };
 
@@ -81,6 +81,7 @@ Workometer.prototype._countTime = function () {
 	this.time0 = now;
 
 	if (this.isResting) {
+		this._checkNewDay();
 		this.fatigue = Math.max(this.fatigue - delta, 0);
 	} else {
 		this.taskWork += delta;

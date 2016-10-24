@@ -75,7 +75,7 @@ TestCase.prototype.assertEqual = function (expected, val, comment) {
     this.series.failTest(msg, comment);
 };
 
-TestCase.prototype.assertInDelta = function (val, expected, delta, comment) {
+TestCase.prototype.assertInDelta = function (expected, delta, val, comment) {
     this.series.checkCount++;
     if (Math.abs(val - expected) <= delta) return;
     this.series.failTest(val + ' is not in +/-' + delta + ' delta around ' + expected, comment);

@@ -38,7 +38,7 @@ TestWorkometer.prototype.testLoadState = function () {
     this.assertEqual(lastWorkTime0, w.time0);
     this.assertEqual(pastFatigue, w.fatigue);
 
-    // read "status" - this updates time counting (like if app was "off" during the gap - so no more fatigue, etc.)
+    // read "status" - updates time counting like if app was "off" during the gap - so no more fatigue, todaysWork, etc.
     var status = {};
     w.getStatus(status);
 
@@ -47,7 +47,7 @@ TestWorkometer.prototype.testLoadState = function () {
     this.assertEqual(true, status.isResting);
     this.assertEqual('task1', status.taskName);
     this.assertEqual(444555, status.taskWork);
-    this.assertEqual(9555555, status.todaysWork);
+    this.assertEqual(0, status.todaysWork);
 
     this.assertEqual(0, w.getLevel()); // other way to get "level"
 };
@@ -73,6 +73,13 @@ TestWorkometer.prototype.testStartStop = function () {
     w.start();
     w.getStatus(status);
     this.assertEqual(false, status.isResting);
+
+    fakeDateNow(fakeT0 + 10 * MINUTE);
+    w.getStatus(status);
+    this.assertInDelta(100/6, 0.01, status.level);
+    fakeDateNow(fakeT0 + 20 * MINUTE);
+    w.getStatus(status);
+    this.assertInDelta(100/3, 0.01, status.level);
 
     var delta = 30 * MINUTE; // so fatigue should be 50%
     fakeDateNow(fakeT0 + delta);
@@ -130,9 +137,22 @@ TestWorkometer.prototype.testStartAppNextDay = function () {
     w.stop();
     w.getStatus(status);
     this.assertEqual(9555555, status.todaysWork);
-
     fakeDateNow(fakeT0 + 6.1 * HOUR);
     w.start();
+    w.getStatus(status);
+    this.assertEqual(0, status.todaysWork);
+
+    // 6 hours while resting - more than 1 refresh
+    w = new Workometer(state0);
+    fakeDateNow(fakeT0);
+    w.start();
+    w.stop();
+    w.getStatus(status);
+    this.assertEqual(9555555, status.todaysWork);
+    fakeDateNow(fakeT0 + 5 * HOUR);
+    w.getStatus(status);
+    this.assertEqual(9555555, status.todaysWork);
+    fakeDateNow(fakeT0 + 6.1 * HOUR);
     w.getStatus(status);
     this.assertEqual(0, status.todaysWork);
 };
