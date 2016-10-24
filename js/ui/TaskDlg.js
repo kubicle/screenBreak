@@ -14,10 +14,7 @@ function TaskDlg(mode, ui, cb) {
     this.oldName = isNewMode ? '' : this.task.getName();
     this.oldTime = util.ms2str(this.task.getTimeWorked());
 
-    this.parent = document.body;
-    this.dialogRoot = PopupDlg.newOverlay();
-
-    var dialog = this.dialog = this.dialogRoot.newDiv('taskDlg dialog');
+    var dialog = this.dialog = Dome.newDiv(null, 'taskDlg dialog');
     dialog.newDiv('dialogTitle').setText(isNewMode ? getText('newTaskTitle') : getText('editTaskTitle'));
 
     var content = dialog.newDiv('content');
@@ -31,8 +28,7 @@ function TaskDlg(mode, ui, cb) {
     if (!isNewMode) this._newButton(btnDiv, 'edit', getText('OK'));
     this._newButton(btnDiv, 'cancel', getText('cancelAction'));
 
-    this.dialogRoot.appendTo(this.parent);
-    this.dialog.appendTo(this.dialogRoot, /*isFloating=*/true);
+    PopupDlg.attachWithOverlay(this.dialog, document.body);
     this.name.elt.focus();
 }
 module.exports = TaskDlg;
@@ -85,7 +81,6 @@ TaskDlg.prototype._validate = function (action) {
 };
 
 TaskDlg.prototype._close = function () {
-    this.dialog.setVisible(false);
-    Dome.removeChild(this.parent, this.dialogRoot);
+    PopupDlg.detachWithOverlay(this.dialog);
     this.cb();
 };

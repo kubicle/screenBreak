@@ -25,8 +25,8 @@ ViewportHandler.prototype.addElement = function (r) {
         var margin = 2 * arranger.MARGIN;
 
         if (r.width + margin > winWidth || r.height + margin > winHeight) {
-            var newWidth = Math.max(winWidth, r.width) + margin;
-            var newHeight = Math.max(winHeight, r.height) + margin;
+            var newWidth = Math.max(winWidth, r.width + margin);
+            var newHeight = Math.max(winHeight, r.height + margin);
 
             setSize(newWidth, newHeight);
 
@@ -39,6 +39,9 @@ ViewportHandler.prototype.addElement = function (r) {
 
 ViewportHandler.prototype.reduce = function (xLimit, yLimit) {
     if (isNw) {
+        var limitMargin = arranger.MARGIN;
+        xLimit += limitMargin; yLimit += limitMargin;
+
         var x = winX, y = winY;
         var w = winWidth, h = winHeight;
         if (xLimit < winWidth) {

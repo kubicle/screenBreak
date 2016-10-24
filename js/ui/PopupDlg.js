@@ -8,7 +8,9 @@ function action() {
     // "this" is the button
     var dlg = this.dlg;
     if (dlg.options) dlg.options.choice = this.id;
-    Dome.removeChild(dlg.parent, dlg.dialogRoot);
+
+    PopupDlg.detachWithOverlay(dlg.dialog);
+
     if (dlg.validateFn) dlg.validateFn(dlg.options);
 }
 
@@ -23,9 +25,7 @@ function PopupDlg(parent, msg, title, options, validateFn) {
     this.options = options;
     this.validateFn = validateFn;
 
-    this.dialogRoot = PopupDlg.newOverlay();
-
-    var dialog = this.dialogRoot.newDiv('popupDlg dialog');
+    var dialog = this.dialog = Dome.newDiv(null, 'popupDlg dialog');
     dialog.newDiv('dialogTitle').setText(title || getText('problem'));
 
     var content = dialog.newDiv('content');
@@ -37,12 +37,12 @@ function PopupDlg(parent, msg, title, options, validateFn) {
         newButton(btnDiv, this, btns[i], i);
     }
 
-    this.dialogRoot.appendTo(this.parent);
+    PopupDlg.attachWithOverlay(this.dialog, this.parent);
 }
 module.exports = PopupDlg;
 
 
-PopupDlg.newOverlay = function (parent) {
+function newOverlay(parent) {
     var overlay = Dome.newDiv(null, 'popupOverlay');
 
     if (parent) {
@@ -53,4 +53,20 @@ PopupDlg.newOverlay = function (parent) {
     }
 
     return overlay;
+}
+
+PopupDlg.attachWithOverlay = function (dome, parent) {
+    var overlay = dome.overlay = newOverlay();
+    overlay.parent = parent;
+    overlay.appendTo(parent);
+    dome.appendTo(overlay, /*isFloating=*/true);
+    overlay.setStyle('opacity', 1);
+};
+
+PopupDlg.detachWithOverlay = function (dome) {
+    dome.overlay.setStyle('opacity', 0);
+    window.setTimeout(function () {
+        dome.setVisible(false);
+        Dome.removeChild(dome.overlay.parent, dome.overlay);
+    }, 300);
 };
