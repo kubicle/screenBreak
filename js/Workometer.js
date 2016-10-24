@@ -28,9 +28,11 @@ function Workometer(state) {
 module.exports = Workometer;
 
 
-Workometer.prototype.reset = function () {
-	this.level = 0;
-	this.fatigue = 0;
+Workometer.prototype.gotBreak = function (minPause) {
+	var correction = minPause * MINUTE;
+	this._updateFatigue(correction);
+	this.taskWork = Math.max(this.taskWork - correction, 0);
+	this.todaysWork = Math.max(this.todaysWork - correction, 0);
 };
 
 Workometer.prototype.serialize = function () {
@@ -60,11 +62,15 @@ Workometer.prototype.start = function () {
 	this.isResting = false;
 };
 
+Workometer.prototype._updateFatigue = function (pause) {
+	this.fatigue = Math.max(this.fatigue - pause, 0);
+};
+
 // Called when we did not "stop" but timers could not fire (computer went on pause)
 Workometer.prototype.backFromSleep = function (pause) {
 	this._checkNewDay();
+	this._updateFatigue(pause);
 	this.time0 = this.lastWorkTime = Date.now();
-	this.fatigue = Math.max(this.fatigue - pause, 0);
 	// NB: no need to adjust time counting since _countTime was not called during the pause
 };
 
@@ -82,7 +88,7 @@ Workometer.prototype._countTime = function () {
 
 	if (this.isResting) {
 		this._checkNewDay();
-		this.fatigue = Math.max(this.fatigue - delta, 0);
+		this._updateFatigue(delta);
 	} else {
 		this.taskWork += delta;
 		this.todaysWork += delta;

@@ -7,7 +7,7 @@
     "unnamedTask": "(default task)",
     "resting": "resting",
 
-    "resetAction": "Got a break",
+    "gotBreakAction": "Got a break",
     "taskAction": "Tasks...",
     "exitAction": "Exit",
     "newTaskAction": "New task...",

@@ -67,7 +67,7 @@ Ui.prototype._createButtons = function (parent) {
 
 Ui.prototype._showSettingsMenu = function () {
     var cm = new ContextMenu();
-    cm.addOption(getText('resetAction'), this.eventHandler.bind(this, 'reset'));
+    cm.addOption(getText('gotBreakAction'), this.eventHandler.bind(this, 'gotBreak'));
     cm.addOption(getText('taskAction'), this._showTaskMenu.bind(this));
     if (nwUtil.isNw()) cm.addOption(getText('exitAction'), this.eventHandler.bind(this, 'exit'));
     cm.attachMenu(this.settingsBtn);

@@ -121,8 +121,8 @@ App.prototype._noteUserIsHere = function () {
 	this.lastUserActionTime = this.lastAlertTime = Date.now();
 };
 
-App.prototype.reset = function () {
-	this.workometer.reset();
+App.prototype.gotBreak = function () {
+	this.workometer.gotBreak(5);
 	this.refresh();
 };
 
@@ -140,7 +140,7 @@ App.prototype.userEventHandler = function (eventName) {
 	switch (eventName) {
 	case 'pause': return this.goOnPause();
 	case 'ping': return this.userPing();
-	case 'reset': return this.reset();
+	case 'gotBreak': return this.gotBreak();
 	case 'exit': return this.terminate();
 	}
 };
