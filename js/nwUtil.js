@@ -7,7 +7,7 @@ var isNw = false;
 var beforeunloadHandlers = [];
 
 var arranger = null;
-var screenWidth, screenHeight;
+var screenWidth, screenHeight, screenX, screenY;
 var mainWin, winX0, winY0, winWidth0, winHeight0;
 var winX, winY, winWidth, winHeight;
 
@@ -30,8 +30,8 @@ ViewportHandler.prototype.addElement = function (r) {
 
             setSize(newWidth, newHeight);
 
-            var newX = Math.min(winX, screenWidth - newWidth);
-            var newY = Math.min(winY, screenHeight - newHeight);
+            var newX = Math.min(winX, screenX + screenWidth - newWidth);
+            var newY = Math.min(winY, screenY + screenHeight - newHeight);
             if (newX !== winX || newY !== winY) setPos(newX, newY);
         }
     }
@@ -45,11 +45,11 @@ ViewportHandler.prototype.reduce = function (xLimit, yLimit) {
         var x = winX, y = winY;
         var w = winWidth, h = winHeight;
         if (xLimit < winWidth) {
-            if (winX < winX0) x = Math.min(winX0, screenWidth - xLimit);
+            if (winX < winX0) x = Math.min(winX0, screenX + screenWidth - xLimit);
             w = Math.max(winWidth0, xLimit);
         }
         if (yLimit < winHeight) {
-            if (winY < winY0) y = Math.min(winY0, screenHeight - yLimit);
+            if (winY < winY0) y = Math.min(winY0, screenY + screenHeight - yLimit);
             h = Math.max(winHeight0, yLimit);
         }
         if (x !== winX || y !== winY) setPos(x, y);
@@ -83,9 +83,21 @@ exports.getArranger = function () {
 };
 
 function nwUpdateScreenInfo() {
-    var screenRect = nw.Screen.screens[0].work_area;
+    // Find which screen mainWin is in
+    var screens = nw.Screen.screens, screenRect;
+    for (var i = 0; i < screens.length; i++) {
+        screenRect = screens[i].work_area;
+        if (winX >= screenRect.x && winX < screenRect.x + screenRect.width &&
+            winY >= screenRect.y && winY < screenRect.y + screenRect.height) {
+            break;
+        }
+    }
+    // Keep this screen's dimensions
+    screenX = screenRect.x; screenY = screenRect.y;
     screenWidth = screenRect.width; screenHeight = screenRect.height;
+}
 
+function nwUpdateWinInfo() {
     winX = winX0 = mainWin.x;
     winY = winY0 = mainWin.y;
     winWidth = winWidth0 = mainWin.width;
@@ -93,6 +105,7 @@ function nwUpdateScreenInfo() {
 }
 
 function browserUpdateScreenInfo() {
+    screenX = screenY = 0;
     screenWidth = winWidth = document.documentElement.clientWidth;
     screenHeight = winHeight = document.documentElement.clientHeight;
 }
@@ -119,7 +132,9 @@ function triggerHandlers() {
 
 function initializeForNw() {
     nw.Screen.Init();
+
     mainWin = nw.Window.get();
+    nwUpdateWinInfo();
 
     mainWin.on('close', function () {
         triggerHandlers();
@@ -131,6 +146,7 @@ function initializeForNw() {
         if (Date.now() - posChangeTime > 200) {
             winX0 = x;
             winY0 = y;
+            nwUpdateScreenInfo(); // just in case mainWin was moved to other screen
         }
     });
 
