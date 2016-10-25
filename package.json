@@ -17,11 +17,12 @@
         "title": "node-webkit demo",
         "icon": "timeslicer.png",
         "toolbar": false,
+        "transparent": true,
         "frame": false,
         "width": 408,
-        "height": 50,
+        "height": 42,
         "position": "center",
         "min_width": 233,
-        "min_height": 50
+        "min_height": 42
     }
 }
