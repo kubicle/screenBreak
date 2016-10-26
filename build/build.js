@@ -117,7 +117,7 @@ Workometer.prototype.serialize = function () {
 	this._saveCurTask();
 
 	return {
-		lastWorkTime: this.time0,
+		lastWorkTime: this.lastWorkTime,
 		taskWork: this.taskWork,
 		todaysWork: this.todaysWork,
 		fatigue: this.fatigue,
@@ -298,9 +298,13 @@ App.prototype.initialize = function () {
 
 App.prototype.terminate = function () {
 	this.workometer.stop();
-	localPref.setValue('workometerState', this.workometer.serialize());
+	this._save();
 	localPref.terminate();
 	nwUtil.terminate();
+};
+
+App.prototype._save = function () {
+	localPref.setValue('workometerState', this.workometer.serialize());
 };
 
 App.prototype.refresh = function () {
@@ -316,10 +320,10 @@ App.prototype.refresh = function () {
 
 	this.ui.refresh();
 
-	this.checkAlert();
+	this._checkAlert();
 };
 
-App.prototype.checkAlert = function () {
+App.prototype._checkAlert = function () {
 	var now = Date.now();
 	var timeSinceLastAlert = now - this.lastAlertTime;
 
@@ -328,6 +332,7 @@ App.prototype.checkAlert = function () {
 		if (timeSinceLastAlert >= WORKING_ALERT_FREQ) {
 			this.lastAlertTime = now;
 			this.ui.showAlert(5);
+			this._save();
 		}
 		var timeInactive = now - this.lastUserActionTime;
 		// When user worked over the maximum of the gauge, we complain; he can "toggle" it off each time
