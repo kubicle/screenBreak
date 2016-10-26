@@ -1,7 +1,6 @@
 'use strict';
 
 var inherits = require('util').inherits;
-var log = require('../log');
 var TestCase = require('./TestCase');
 var Workometer = require('../Workometer');
 
@@ -31,15 +30,19 @@ function fakeDateNow(time) {
     Date.now = function () { return time; };
 }
 
+function newWorkometer() {
+    return new Workometer(JSON.parse(JSON.stringify(state0)));
+}
+
 TestWorkometer.prototype.testLoadState = function () {
-    var w = new Workometer(state0);
+    var status = {};
+    var w = newWorkometer();
 
     // private ones
     this.assertEqual(lastWorkTime0, w.time0);
     this.assertEqual(pastFatigue, w.fatigue);
 
     // read "status" - updates time counting like if app was "off" during the gap - so no more fatigue, todaysWork, etc.
-    var status = {};
     w.getStatus(status);
 
     this.assertEqual(0, status.fatigue);
@@ -53,15 +56,35 @@ TestWorkometer.prototype.testLoadState = function () {
 };
 
 TestWorkometer.prototype.testSaveState = function () {
-    var w = new Workometer(state0);
-
+    var status = {};
+    var w = newWorkometer();
     var state = w.serialize();
     this.assertEqual(state0, state);
+
+    fakeDateNow(fakeT0);
+    w.start(); // start or stop update lastWorkTime
+    state = w.serialize();
+    this.assertEqual(fakeT0, state.lastWorkTime);
+
+    var stopWorkTime = fakeT0 + 10 * MINUTE;
+    fakeDateNow(stopWorkTime);
+    w.getStatus(status);
+
+    state = w.serialize();
+    this.assertEqual(fakeT0, state.lastWorkTime);
+    w.stop();
+    state = w.serialize();
+    this.assertEqual(stopWorkTime, state.lastWorkTime);
+
+    fakeDateNow(stopWorkTime + 3 * HOUR);
+    w.getStatus(status);
+    state = w.serialize();
+    this.assertEqual(stopWorkTime, state.lastWorkTime);
 };
 
 TestWorkometer.prototype.testStartStop = function () {
     var status = {};
-    var w = new Workometer(state0);
+    var w = newWorkometer();
 
     fakeDateNow(fakeT0);
     w.getStatus(status);
@@ -103,7 +126,7 @@ TestWorkometer.prototype.testStartStop = function () {
 // When app was stopped (or computer off) for not enough time to clear up passed fatigue
 TestWorkometer.prototype.testStartAppWithFatigue = function () {
     var status = {};
-    var w = new Workometer(state0);
+    var w = newWorkometer();
 
     fakeDateNow(lastWorkTime0 + 20000);
     w.start();
@@ -115,23 +138,23 @@ TestWorkometer.prototype.testStartAppWithFatigue = function () {
 
 TestWorkometer.prototype.testStartAppNextDay = function () {
     var status = {};
-    var w = new Workometer(state0);
 
     // less than 6 hours
+    var w = newWorkometer();
     fakeDateNow(lastWorkTime0 + 5.9 * HOUR);
     w.start();
     w.getStatus(status);
     this.assertEqual(9555555, status.todaysWork);
 
     // 6 hours while app is OFF
-    w = new Workometer(state0);
+    w = newWorkometer();
     fakeDateNow(lastWorkTime0 + 6.1 * HOUR);
     w.start();
     w.getStatus(status);
     this.assertEqual(0, status.todaysWork);
 
     // 6 hours while resting
-    w = new Workometer(state0);
+    w = newWorkometer();
     fakeDateNow(fakeT0);
     w.start();
     w.stop();
@@ -143,7 +166,7 @@ TestWorkometer.prototype.testStartAppNextDay = function () {
     this.assertEqual(0, status.todaysWork);
 
     // 6 hours while resting - more than 1 refresh
-    w = new Workometer(state0);
+    w = newWorkometer();
     fakeDateNow(fakeT0);
     w.start();
     w.stop();
@@ -159,7 +182,7 @@ TestWorkometer.prototype.testStartAppNextDay = function () {
 
 TestWorkometer.prototype.testComputerSleep = function () {
     var status = {};
-    var w = new Workometer(state0);
+    var w = newWorkometer();
 
     // computer sleep while working = pause
     fakeDateNow(lastWorkTime0);

@@ -39,7 +39,7 @@ Workometer.prototype.serialize = function () {
 	this._saveCurTask();
 
 	return {
-		lastWorkTime: this.time0,
+		lastWorkTime: this.lastWorkTime,
 		taskWork: this.taskWork,
 		todaysWork: this.todaysWork,
 		fatigue: this.fatigue,
