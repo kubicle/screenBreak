@@ -32,8 +32,6 @@ function App() {
 	this.currentFreq = 0;
 }
 
-var app = new App();
-
 
 App.prototype.initialize = function () {
 	this.workometer = new Workometer(localPref.getValue('workometerState'));
@@ -131,7 +129,7 @@ App.prototype.gotBreak = function () {
 	this.refresh();
 };
 
-App.prototype.userPing = function () {
+App.prototype.backToWork = function () {
 	if (!this.isWorking) this.toggle();
 };
 
@@ -144,10 +142,11 @@ App.prototype.userEventHandler = function (eventName) {
 
 	switch (eventName) {
 	case 'pause': return this.goOnPause();
-	case 'ping': return this.userPing();
+	case 'backToWork': return this.backToWork();
 	case 'gotBreak': return this.gotBreak();
 	case 'exit': return this.terminate();
 	}
 };
 
+var app = new App();
 app.initialize();

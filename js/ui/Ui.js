@@ -86,8 +86,17 @@ Ui.prototype._showTaskMenu = function () {
 };
 
 Ui.prototype.setWorking = function (isWorking) {
-    this.pauseBtn.setVisible(isWorking);
-    this.pingBtn.setVisible(!isWorking);
+    var btnToHide = isWorking ? this.workBtn : this.pauseBtn;
+    var btnToShow = isWorking ? this.pauseBtn : this.workBtn;
+
+    btnToHide.toggleClass('activated', true);
+
+    window.setTimeout(function () {
+        btnToHide.setVisible(false);
+        btnToHide.toggleClass('activated', false);
+
+        btnToShow.setVisible(true);
+    }, 1000);
 };
 
 Ui.prototype.displayGauge = function (value, label) {

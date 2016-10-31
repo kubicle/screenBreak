@@ -3,6 +3,10 @@
 @fullColor: #A72300;
 @alertColor: red;
 
+@btnBorder: #5a7da2;
+@btnBorderOn: #74b5a6;
+
+
 .mainDiv {
     background: rgba(76, 97, 94, 0.5);
     border-radius: 7px;
@@ -62,7 +66,7 @@
 		}
 	}
 
-	.pingBtn, .pauseBtn {
+	.workBtn, .pauseBtn {
 		.noDrag();
 		display: inline-block;
 		vertical-align: top;
@@ -72,9 +76,14 @@
 		height: 30px;
 		background-color: #000;
 		border-radius: 7px;
+		border: 1px solid @btnBorder;
 		color: #666;
 		line-height: 30px;
 		text-align: center;
+		&.activated {
+			border: 1px solid @btnBorderOn;
+			color: white;
+		}
 	}
 
 	.settingsBtn {
@@ -87,7 +96,7 @@
 		height: 30px;
 		background-color: #000;
 		border-radius: 7px;
-		border-color: #74b5a6;
+		border: 1px solid @btnBorder;
 		.settingsBtnIcon {
 			height: 100%;
 			background: url("assets/settings.png") 50% no-repeat;
