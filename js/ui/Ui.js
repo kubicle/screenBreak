@@ -38,11 +38,6 @@ Ui.prototype.createUi = function () {
     this._createButtons(mainDiv);
 };
 
-Ui.prototype._addTapBehavior = function (div, eventName) {
-    var handler = function (eventName) { this.eventHandler(eventName); }.bind(this, eventName);
-    touchManager.listenOn(div.elt, handler);
-};
-
 Ui.prototype._createGauge = function (parent) {
     var gauge = this.gauge = parent.newDiv('gauge');
     this.green = gauge.newDiv('colorBand green');
@@ -53,16 +48,11 @@ Ui.prototype._createGauge = function (parent) {
     touchManager.listenOn(gauge.elt, this._switchDisplay.bind(this));
 };
 
-Ui.prototype._newButton = function (parent, className, label, action) {
-    var btn = parent.newDiv(className).setText(label);
-    this._addTapBehavior(btn, action);
-    return btn;
-};
-
 Ui.prototype._createButtons = function (parent) {
-    this.pauseBtn = this._newButton(parent, 'pauseBtn', getText('pauseBtn'), 'pause');
-    this.pingBtn = this._newButton(parent, 'pingBtn', getText('pingBtn'), 'ping');
-    this.settingsBtn = Dome.newGfxButton(parent, 'settings', this._showSettingsMenu.bind(this));
+    this.pauseBtn = Dome.newBtn(parent, 'pauseBtn', getText('pauseBtn'), this.eventHandler.bind(null, 'pause'));
+    this.workBtn = Dome.newBtn(parent, 'workBtn', getText('workBtn'), this.eventHandler.bind(null, 'backToWork'));
+    this.workBtn.setVisible(false);
+    this.settingsBtn = Dome.newGfxBtn(parent, 'settingsBtn', this._showSettingsMenu.bind(this));
 };
 
 Ui.prototype._showSettingsMenu = function () {

@@ -127,6 +127,7 @@ Dome.prototype.newDiv = function (className, name) {
     return new Dome(this, 'div', className, name || className);
 };
 
+// Only if you want a "real" button - not always the best choice because of its various default behaviors
 Dome.newButton = function (parent, name, label, action) {
     var button = new Dome(parent, 'button', name + 'Button', name);
     if (label) button.elt.innerText = label;
@@ -134,9 +135,18 @@ Dome.newButton = function (parent, name, label, action) {
     return button;
 };
 
-Dome.newGfxButton = function (parent, name, action) {
-    var btn = Dome.newButton(parent, name, null, action);
-    btn.newDiv(name + 'BtnIcon btnIcon');
+// E.g. Dome.newBtn(parent, 'pauseBtn', 'Take a break', pauseBtnHandler);
+Dome.newBtn = function (parent, name, label, action) {
+    var btn = Dome.newDiv(parent, name).setText(label);
+    btn.on('click', action);
+    return btn;
+};
+
+// Same as newBtn with an added div for button's icon
+// E.g. if name is "pauseBtn", image div will have classes "pauseBtnIcon" and "btnIcon"
+Dome.newGfxBtn = function (parent, name, action) {
+    var btn = Dome.newBtn(parent, name, null, action);
+    btn.newDiv(name + 'Icon btnIcon');
     return btn;
 };
 
