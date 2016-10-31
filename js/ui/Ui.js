@@ -32,6 +32,7 @@ module.exports = Ui;
 
 /** This is the entry point for starting the app */
 Ui.prototype.createUi = function () {
+    if (!nwUtil.isNw()) document.body.style.backgroundColor = '#222';
     Dome.setPageTitle(this.app.appName);
     var mainDiv = Dome.newDiv(document.body, 'mainDiv');
     this._createGauge(mainDiv);
