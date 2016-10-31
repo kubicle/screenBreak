@@ -67,7 +67,6 @@ App.prototype.refresh = function () {
 	var extraPause = timeSinceLastRefresh - this.currentFreq;
 	if (extraPause > 5 * SECOND) {
 		this.workometer.backFromSleep(extraPause);
-		if (!this.isWorking) return this.toggle();
 	}
 
 	this.ui.refresh();
