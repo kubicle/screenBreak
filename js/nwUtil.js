@@ -85,6 +85,7 @@ exports.getArranger = function () {
 function nwUpdateScreenInfo() {
     // Find which screen mainWin is in
     var screens = nw.Screen.screens, screenRect;
+    if (!screens) return console.warn('nw.Screen.screens is undefined');
     for (var i = 0; i < screens.length; i++) {
         screenRect = screens[i].work_area;
         if (winX >= screenRect.x && winX < screenRect.x + screenRect.width &&
