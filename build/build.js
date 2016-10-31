@@ -93,9 +93,11 @@ function Workometer(state) {
 	state = state || {};
 	this.time0 = this.lastWorkTime = state.lastWorkTime || Date.now();
 	this.taskWork = state.taskWork || 0;
-	this.todaysWork = state.todaysWork || 0;
 	this.fatigue = state.fatigue || 0;
 	this.tasks = state.tasks || {};
+	this.todaysWork = state.todaysWork || 0;
+	this.todaysLongestWork = state.todaysLongestWork || 0;
+	this.todaysTooLongCount = state.todaysTooLongCount || 0;
 
 	if (state.curTaskName !== undefined) {
 		this._loadCurTask(state.curTaskName);
@@ -127,9 +129,11 @@ Workometer.prototype.serialize = function () {
 };
 
 Workometer.prototype._checkNewDay = function () {
-	if (Date.now() - this.lastWorkTime > NEW_DAY_BREAK) {
-		this.todaysWork = 0;
-	}
+	if (Date.now() - this.lastWorkTime <= NEW_DAY_BREAK) return;
+
+	this.todaysWork = 0;
+	this.todaysLongestWork = 0;
+	this.todaysTooLongCount = 0;
 };
 
 Workometer.prototype.start = function () {
@@ -171,6 +175,8 @@ Workometer.prototype._countTime = function () {
 		this.taskWork += delta;
 		this.todaysWork += delta;
 		this.fatigue += delta / NONSTOP_PERIOD * REST_FOR_NONSTOP_PERIOD;
+		if (delta > this.todaysLongestWork) this.todaysLongestWork = delta;
+		if (delta > HOUR) this.todaysTooLongCount++;
 	}
 	this.level = this.fatigue / REST_FOR_NONSTOP_PERIOD * 100;
 };
@@ -278,8 +284,6 @@ function App() {
 	this.currentFreq = 0;
 }
 
-var app = new App();
-
 
 App.prototype.initialize = function () {
 	this.workometer = new Workometer(localPref.getValue('workometerState'));
@@ -315,7 +319,6 @@ App.prototype.refresh = function () {
 	var extraPause = timeSinceLastRefresh - this.currentFreq;
 	if (extraPause > 5 * SECOND) {
 		this.workometer.backFromSleep(extraPause);
-		if (!this.isWorking) return this.toggle();
 	}
 
 	this.ui.refresh();
@@ -377,7 +380,7 @@ App.prototype.gotBreak = function () {
 	this.refresh();
 };
 
-App.prototype.userPing = function () {
+App.prototype.backToWork = function () {
 	if (!this.isWorking) this.toggle();
 };
 
@@ -390,12 +393,13 @@ App.prototype.userEventHandler = function (eventName) {
 
 	switch (eventName) {
 	case 'pause': return this.goOnPause();
-	case 'ping': return this.userPing();
+	case 'backToWork': return this.backToWork();
 	case 'gotBreak': return this.gotBreak();
 	case 'exit': return this.terminate();
 	}
 };
 
+var app = new App();
 app.initialize();
 
 },{"../package.json":23,"./Workometer":4,"./localPref":6,"./nwUtil":8,"./ui/Ui":15}],6:[function(require,module,exports){
@@ -592,6 +596,7 @@ exports.getArranger = function () {
 function nwUpdateScreenInfo() {
     // Find which screen mainWin is in
     var screens = nw.Screen.screens, screenRect;
+    if (!screens) return console.warn('nw.Screen.screens is undefined');
     for (var i = 0; i < screens.length; i++) {
         screenRect = screens[i].work_area;
         if (winX >= screenRect.x && winX < screenRect.x + screenRect.width &&
@@ -941,6 +946,7 @@ Dome.prototype.newDiv = function (className, name) {
     return new Dome(this, 'div', className, name || className);
 };
 
+// Only if you want a "real" button - not always the best choice because of its various default behaviors
 Dome.newButton = function (parent, name, label, action) {
     var button = new Dome(parent, 'button', name + 'Button', name);
     if (label) button.elt.innerText = label;
@@ -948,9 +954,18 @@ Dome.newButton = function (parent, name, label, action) {
     return button;
 };
 
-Dome.newGfxButton = function (parent, name, action) {
-    var btn = Dome.newButton(parent, name, null, action);
-    btn.newDiv(name + 'BtnIcon btnIcon');
+// E.g. Dome.newBtn(parent, 'pauseBtn', 'Take a break', pauseBtnHandler);
+Dome.newBtn = function (parent, name, label, action) {
+    var btn = Dome.newDiv(parent, name).setText(label);
+    btn.on('click', action);
+    return btn;
+};
+
+// Same as newBtn with an added div for button's icon
+// E.g. if name is "pauseBtn", image div will have classes "pauseBtnIcon" and "btnIcon"
+Dome.newGfxBtn = function (parent, name, action) {
+    var btn = Dome.newBtn(parent, name, null, action);
+    btn.newDiv(name + 'Icon btnIcon');
     return btn;
 };
 
@@ -1519,15 +1534,11 @@ module.exports = Ui;
 
 /** This is the entry point for starting the app */
 Ui.prototype.createUi = function () {
+    if (!nwUtil.isNw()) document.body.style.backgroundColor = '#222';
     Dome.setPageTitle(this.app.appName);
     var mainDiv = Dome.newDiv(document.body, 'mainDiv');
     this._createGauge(mainDiv);
     this._createButtons(mainDiv);
-};
-
-Ui.prototype._addTapBehavior = function (div, eventName) {
-    var handler = function (eventName) { this.eventHandler(eventName); }.bind(this, eventName);
-    touchManager.listenOn(div.elt, handler);
 };
 
 Ui.prototype._createGauge = function (parent) {
@@ -1540,16 +1551,11 @@ Ui.prototype._createGauge = function (parent) {
     touchManager.listenOn(gauge.elt, this._switchDisplay.bind(this));
 };
 
-Ui.prototype._newButton = function (parent, className, label, action) {
-    var btn = parent.newDiv(className).setText(label);
-    this._addTapBehavior(btn, action);
-    return btn;
-};
-
 Ui.prototype._createButtons = function (parent) {
-    this.pauseBtn = this._newButton(parent, 'pauseBtn', getText('pauseBtn'), 'pause');
-    this.pingBtn = this._newButton(parent, 'pingBtn', getText('pingBtn'), 'ping');
-    this.settingsBtn = Dome.newGfxButton(parent, 'settings', this._showSettingsMenu.bind(this));
+    this.pauseBtn = Dome.newBtn(parent, 'pauseBtn', getText('pauseBtn'), this.eventHandler.bind(null, 'pause'));
+    this.workBtn = Dome.newBtn(parent, 'workBtn', getText('workBtn'), this.eventHandler.bind(null, 'backToWork'));
+    this.workBtn.setVisible(false);
+    this.settingsBtn = Dome.newGfxBtn(parent, 'settingsBtn', this._showSettingsMenu.bind(this));
 };
 
 Ui.prototype._showSettingsMenu = function () {
@@ -1583,8 +1589,17 @@ Ui.prototype._showTaskMenu = function () {
 };
 
 Ui.prototype.setWorking = function (isWorking) {
-    this.pauseBtn.setVisible(isWorking);
-    this.pingBtn.setVisible(!isWorking);
+    var btnToHide = isWorking ? this.workBtn : this.pauseBtn;
+    var btnToShow = isWorking ? this.pauseBtn : this.workBtn;
+
+    btnToHide.toggleClass('activated', true);
+
+    window.setTimeout(function () {
+        btnToHide.setVisible(false);
+        btnToHide.toggleClass('activated', false);
+
+        btnToShow.setVisible(true);
+    }, 1000);
 };
 
 Ui.prototype.displayGauge = function (value, label) {
@@ -1666,8 +1681,8 @@ Ui.prototype._showTaskDlg = function (mode) {
 var css = ".contextMenu {\n  position: relative;\n  width: 150px;\n  background-color: rgba(120, 120, 120, 0.2);\n  border-radius: 7px;\n  border: 1px solid #58636d;\n}\n.contextMenu .menuOption {\n  margin: 1px 1px 0 1px;\n  padding: 11px;\n  border-radius: 7px;\n  background-color: rgba(0, 0, 0, 0.7);\n  color: #e4e4e4;\n}\n";(require('lessify'))(css); module.exports = css;
 },{"lessify":2}],17:[function(require,module,exports){
 module.exports={
-    "pauseBtn": "Bye!",
-    "pingBtn": "I am here",
+    "pauseBtn": "Take a break",
+    "workBtn": "I am here",
     "hourShort": "h",
     "minuteShort": "min",
     "todaysWork": "today",
@@ -1704,7 +1719,7 @@ function getText(id) {
 module.exports = getText;
 
 },{"./en_dict.json":17}],19:[function(require,module,exports){
-var css = "body {\n  -webkit-touch-callout: none;\n  /* iOS Safari */\n  -webkit-user-select: none;\n  /* Chrome/Safari/Opera */\n  -moz-user-select: none;\n  /* Firefox */\n  -ms-user-select: none;\n  /* Internet Explorer/Edge */\n  user-select: none;\n  /* Non-prefixed version, currently not supported by any browser */\n  -webkit-app-region: drag;\n  background: transparent;\n  font-family: \"Arial\";\n  font-size: 16px;\n  margin: 0px;\n}\n::-webkit-scrollbar {\n  -webkit-appearance: none;\n  width: 7px;\n  height: 7px;\n}\n::-webkit-scrollbar-track {\n  -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.2);\n  -webkit-border-radius: 10px;\n  border-radius: 7px;\n  margin: 1px;\n}\n::-webkit-scrollbar-thumb {\n  border-radius: 7px;\n  background-color: rgba(0, 0, 0, 0.5);\n  -webkit-box-shadow: 0 0 1px rgba(255, 255, 255, 0.5);\n}\n.dialog {\n  padding: 10px;\n  background-color: #ddd;\n  color: #000;\n  border-radius: 7px;\n}\n.dialogTitle {\n  font-size: 30px;\n  background-color: #ccc;\n  color: #000;\n  border: 1px solid #afafaf;\n  border-radius: 7px;\n  margin: -6px -6px 0px -6px;\n  padding: 3px 0px 3px 6px;\n}\n.mainDiv {\n  background: rgba(76, 97, 94, 0.5);\n  border-radius: 7px;\n  border: 1px solid rgba(0, 78, 255, 0.32);\n  padding-left: 12px;\n  width: 392px;\n}\n.mainDiv .gauge {\n  -webkit-app-region: no-drag;\n  display: inline-block;\n  position: relative;\n  margin: 5px;\n  background-color: #000;\n  border-radius: 7px;\n  width: 210px;\n  height: 30px;\n  box-sizing: border-box;\n  padding: 4px 0 0 4px;\n}\n.mainDiv .gauge.alert {\n  background-color: #a06000;\n}\n.mainDiv .gauge .colorBand {\n  display: inline-block;\n  height: calc(100% - 2px);\n}\n.mainDiv .gauge .colorBand.green {\n  border-radius: 5px 0 0 5px;\n  background-color: green;\n}\n.mainDiv .gauge .colorBand.amber {\n  background-color: #A17F13;\n}\n.mainDiv .gauge .colorBand.red {\n  background-color: #A72300;\n}\n.mainDiv .gauge.full .colorBand {\n  background-color: #A72300;\n}\n.mainDiv .gauge.full .colorBand.red {\n  border-radius: 0 5px 5px 0;\n  width: calc(34% - 2px);\n}\n.mainDiv .gauge.alert .colorBand {\n  background-color: red;\n}\n.mainDiv .gauge .label {\n  position: absolute;\n  top: 1px;\n  line-height: 30px;\n  width: 100%;\n  text-align: center;\n  color: #a7a7a7;\n  text-shadow: 1px 1px 1px black;\n}\n.mainDiv .pingBtn,\n.mainDiv .pauseBtn {\n  -webkit-app-region: no-drag;\n  display: inline-block;\n  vertical-align: top;\n  margin: 5px;\n  width: 100px;\n  height: 30px;\n  background-color: #000;\n  border-radius: 7px;\n  color: #666;\n  line-height: 30px;\n  text-align: center;\n  -webkit-touch-callout: none;\n  /* iOS Safari */\n  -webkit-user-select: none;\n  /* Chrome/Safari/Opera */\n  -moz-user-select: none;\n  /* Firefox */\n  -ms-user-select: none;\n  /* Internet Explorer/Edge */\n  user-select: none;\n  /* Non-prefixed version, currently not supported by any browser */\n}\n.mainDiv .settingsButton {\n  -webkit-app-region: no-drag;\n  display: inline-block;\n  vertical-align: top;\n  margin: 5px;\n  width: 40px;\n  height: 30px;\n  background-color: #000;\n  border-radius: 7px;\n  border-color: #74b5a6;\n}\n.mainDiv .settingsButton .settingsBtnIcon {\n  height: 100%;\n  background: url(\"assets/settings.png\") 50% no-repeat;\n  -webkit-filter: sepia(0.9) brightness(2);\n  background-size: auto 95%;\n}\n";(require('lessify'))(css); module.exports = css;
+var css = "body {\n  -webkit-touch-callout: none;\n  /* iOS Safari */\n  -webkit-user-select: none;\n  /* Chrome/Safari/Opera */\n  -moz-user-select: none;\n  /* Firefox */\n  -ms-user-select: none;\n  /* Internet Explorer/Edge */\n  user-select: none;\n  /* Non-prefixed version, currently not supported by any browser */\n  -webkit-app-region: drag;\n  background: transparent;\n  font-family: \"Arial\";\n  font-size: 16px;\n  margin: 0px;\n}\n::-webkit-scrollbar {\n  -webkit-appearance: none;\n  width: 7px;\n  height: 7px;\n}\n::-webkit-scrollbar-track {\n  -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.2);\n  -webkit-border-radius: 10px;\n  border-radius: 7px;\n  margin: 1px;\n}\n::-webkit-scrollbar-thumb {\n  border-radius: 7px;\n  background-color: rgba(0, 0, 0, 0.5);\n  -webkit-box-shadow: 0 0 1px rgba(255, 255, 255, 0.5);\n}\n.dialog {\n  padding: 10px;\n  background-color: #ddd;\n  color: #000;\n  border-radius: 7px;\n}\n.dialogTitle {\n  font-size: 30px;\n  background-color: #ccc;\n  color: #000;\n  border: 1px solid #afafaf;\n  border-radius: 7px;\n  margin: -6px -6px 0px -6px;\n  padding: 3px 0px 3px 6px;\n}\n.mainDiv {\n  background: rgba(76, 97, 94, 0.5);\n  border-radius: 7px;\n  border: 1px solid rgba(0, 78, 255, 0.32);\n  padding-left: 12px;\n  width: 392px;\n}\n.mainDiv .gauge {\n  -webkit-app-region: no-drag;\n  display: inline-block;\n  position: relative;\n  margin: 5px;\n  background-color: #000;\n  border-radius: 7px;\n  width: 210px;\n  height: 30px;\n  box-sizing: border-box;\n  padding: 4px 0 0 4px;\n}\n.mainDiv .gauge.alert {\n  background-color: #a06000;\n}\n.mainDiv .gauge .colorBand {\n  display: inline-block;\n  height: calc(100% - 2px);\n}\n.mainDiv .gauge .colorBand.green {\n  border-radius: 5px 0 0 5px;\n  background-color: green;\n}\n.mainDiv .gauge .colorBand.amber {\n  background-color: #A17F13;\n}\n.mainDiv .gauge .colorBand.red {\n  background-color: #A72300;\n}\n.mainDiv .gauge.full .colorBand {\n  background-color: #A72300;\n}\n.mainDiv .gauge.full .colorBand.red {\n  border-radius: 0 5px 5px 0;\n  width: calc(34% - 2px);\n}\n.mainDiv .gauge.alert .colorBand {\n  background-color: red;\n}\n.mainDiv .gauge .label {\n  position: absolute;\n  top: 1px;\n  line-height: 30px;\n  width: 100%;\n  text-align: center;\n  color: #a7a7a7;\n  text-shadow: 1px 1px 1px black;\n}\n.mainDiv .workBtn,\n.mainDiv .pauseBtn {\n  -webkit-app-region: no-drag;\n  display: inline-block;\n  vertical-align: top;\n  box-sizing: border-box;\n  margin: 5px;\n  width: 100px;\n  height: 30px;\n  background-color: #000;\n  border-radius: 7px;\n  border: 1px solid #5a7da2;\n  color: #666;\n  line-height: 30px;\n  text-align: center;\n}\n.mainDiv .workBtn.activated,\n.mainDiv .pauseBtn.activated {\n  border: 1px solid #74b5a6;\n  color: white;\n}\n.mainDiv .settingsBtn {\n  -webkit-app-region: no-drag;\n  display: inline-block;\n  vertical-align: top;\n  box-sizing: border-box;\n  margin: 5px;\n  width: 40px;\n  height: 30px;\n  background-color: #000;\n  border-radius: 7px;\n  border: 1px solid #5a7da2;\n}\n.mainDiv .settingsBtn .settingsBtnIcon {\n  height: 100%;\n  background: url(\"assets/settings.png\") 50% no-repeat;\n  -webkit-filter: sepia(0.9) brightness(2);\n  background-size: auto 95%;\n}\n";(require('lessify'))(css); module.exports = css;
 },{"lessify":2}],20:[function(require,module,exports){
 var css = ".popupOverlay {\n  z-index: 2000;\n  position: absolute;\n  left: 0;\n  top: 0;\n  width: 100%;\n  height: 100%;\n  border-radius: 7px;\n  background-color: rgba(0, 0, 0, 0.4);\n  transition: opacity 300ms ease-out;\n  opacity: 0;\n}\n.popupDlg {\n  position: relative;\n  margin: 30px auto;\n  width: 305px;\n}\n.popupDlg .content {\n  padding: 20px;\n  white-space: pre-wrap;\n  word-wrap: break-word;\n}\n.popupDlg .btnDiv {\n  width: 100%;\n  display: inline-block;\n  margin: -10px 0 -10px 0;\n}\n.popupDlg .btnDiv .popupDlgButton {\n  float: right;\n}\n";(require('lessify'))(css); module.exports = css;
 },{"lessify":2}],21:[function(require,module,exports){
