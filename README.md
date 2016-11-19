@@ -11,19 +11,22 @@ CAUTION: As usual for any persisting symptoms, if you do not feel right you shou
 # How does it work? 
 When you sit down, click on the "I am here" button.
 
-(image) 
+![sb1-iamhere arrow](https://cloud.githubusercontent.com/assets/5130338/20453195/097aadb4-ae60-11e6-8eb2-b9a92a7fe4d7.png)
 
 The gauge will start moving slowly from green to amber, then to red.
 It takes one hour to fill up entirely.
 
-(image) 
+![sb2](https://cloud.githubusercontent.com/assets/5130338/20453204/1e0d4b6a-ae60-11e6-974e-0781e9fe30f8.png)
 
 Once the red zone is filled, the gauge will turn entirely red. A moment later, it will start flashing annoyingly.
 This is when you are supposed to take a break.
 
-(image) 
+![sb-red arrow](https://cloud.githubusercontent.com/assets/5130338/20453207/2942976a-ae60-11e6-957a-d875f2d932dc.png)
 
 Tap on the "Take a break" button, then stand up and enjoy your break!
+
+While you are away the gauge will progressively move back to amber, then green.
+Of course you can take a break before you see the full red annoyingly-flashing gauge; this is actually recommended! Read more below...
 
 # How often should you take a break? 
 At least once every hour, a 5 minute break is recommended.
