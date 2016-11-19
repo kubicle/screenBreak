@@ -15,9 +15,11 @@ function Workometer(state) {
 	state = state || {};
 	this.time0 = this.lastWorkTime = state.lastWorkTime || Date.now();
 	this.taskWork = state.taskWork || 0;
-	this.todaysWork = state.todaysWork || 0;
 	this.fatigue = state.fatigue || 0;
 	this.tasks = state.tasks || {};
+	this.todaysWork = state.todaysWork || 0;
+	this.todaysLongestWork = state.todaysLongestWork || 0;
+	this.todaysTooLongCount = state.todaysTooLongCount || 0;
 
 	if (state.curTaskName !== undefined) {
 		this._loadCurTask(state.curTaskName);
@@ -49,9 +51,11 @@ Workometer.prototype.serialize = function () {
 };
 
 Workometer.prototype._checkNewDay = function () {
-	if (Date.now() - this.lastWorkTime > NEW_DAY_BREAK) {
-		this.todaysWork = 0;
-	}
+	if (Date.now() - this.lastWorkTime <= NEW_DAY_BREAK) return;
+
+	this.todaysWork = 0;
+	this.todaysLongestWork = 0;
+	this.todaysTooLongCount = 0;
 };
 
 Workometer.prototype.start = function () {
@@ -93,6 +97,8 @@ Workometer.prototype._countTime = function () {
 		this.taskWork += delta;
 		this.todaysWork += delta;
 		this.fatigue += delta / NONSTOP_PERIOD * REST_FOR_NONSTOP_PERIOD;
+		if (delta > this.todaysLongestWork) this.todaysLongestWork = delta;
+		if (delta > HOUR) this.todaysTooLongCount++;
 	}
 	this.level = this.fatigue / REST_FOR_NONSTOP_PERIOD * 100;
 };
