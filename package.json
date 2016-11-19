@@ -1,6 +1,6 @@
 {
     "main": "index.html",
-    "name": "timeslicer",
+    "name": "screenBreak",
     "version": "0.1.0",
     "dependencies": {
     },
@@ -15,7 +15,7 @@
     },
     "window": {
         "title": "node-webkit demo",
-        "icon": "timeslicer.png",
+        "icon": "appIcon.png",
         "toolbar": false,
         "transparent": true,
         "frame": false,

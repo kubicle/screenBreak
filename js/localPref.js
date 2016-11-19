@@ -2,7 +2,7 @@
 
 var log = require('./log');
 
-var entryName = 'timeslicer.1';
+var entryName = 'screenBreak.1';
 
 
 function LocalPref() {

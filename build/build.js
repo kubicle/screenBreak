@@ -331,11 +331,11 @@ App.prototype._checkAlert = function () {
 	var timeSinceLastAlert = now - this.lastAlertTime;
 
 	if (this.isWorking) {
+		this._save(); // a bit too often; useful for crashes or unexpected system shutdown
 		// Could be optional: this gives a chance to notice we forgot to switch task, etc.
 		if (timeSinceLastAlert >= WORKING_ALERT_FREQ) {
 			this.lastAlertTime = now;
 			this.ui.showAlert(5);
-			this._save();
 		}
 		var timeInactive = now - this.lastUserActionTime;
 		// When user worked over the maximum of the gauge, we complain; he can "toggle" it off each time
@@ -407,7 +407,7 @@ app.initialize();
 
 var log = require('./log');
 
-var entryName = 'timeslicer.1';
+var entryName = 'screenBreak.1';
 
 
 function LocalPref() {
@@ -1758,7 +1758,7 @@ exports.str2ms = function (str) {
 },{"./getText":18}],23:[function(require,module,exports){
 module.exports={
     "main": "index.html",
-    "name": "timeslicer",
+    "name": "screenBreak",
     "version": "0.1.0",
     "dependencies": {
     },
@@ -1773,7 +1773,7 @@ module.exports={
     },
     "window": {
         "title": "node-webkit demo",
-        "icon": "timeslicer.png",
+        "icon": "appIcon.png",
         "toolbar": false,
         "transparent": true,
         "frame": false,
