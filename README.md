@@ -1,3 +1,5 @@
+- [run it](http://rawgit.com/kubicle/screenBreak/master/index.html) in your browser.
+
 # Indications
 This tiny application can help you minimize various health and efficiency issues created by sitting too long in front of a computer screen:
 - Backache

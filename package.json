@@ -7,10 +7,12 @@
     "devDependencies": {
         "browserify": "~13.0.0",
         "lessify": "~1.0.1",
-        "watchify": "^3.2.2"
+        "watchify": "^3.2.2",
+        "uglify-js": "~2.6.2"
     },
     "scripts": {
-        "build": "watchify js/app.js --no-detect-globals --bare -t lessify -o build/build.js -v",
+        "build": "browserify js/app.js --no-detect-globals --bare -t lessify | uglifyjs -o build/build.js -m",
+        "dev-build": "watchify js/app.js --no-detect-globals --bare -t lessify -o build/build.js -v",
         "test": "watchify js/test/testApp.js -o build/testBuild.js -t lessify -v"
     },
     "window": {
