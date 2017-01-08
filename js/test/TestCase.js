@@ -52,12 +52,12 @@ TestCase.prototype._compareObject = function (expected, value) {
 TestCase.prototype.compareValue = function (expected, val) {
     if (expected instanceof Array) {
         if (!val instanceof Array) return 'Expected Array but got ' + val;
-        if (val.length !== expected.length) {
-            return 'Expected Array of size ' + expected.length + ' but got size ' + val.length;
-        }
         for (var i = 0; i < expected.length; i++) {
             var msg = this.compareValue(expected[i], val[i]);
-            if (msg) return msg;
+            if (msg) return 'Array item #' + i + ': ' + msg;
+        }
+        if (val.length !== expected.length) {
+            return 'Expected Array of size ' + expected.length + ' but got size ' + val.length;
         }
         return ''; // equal
     }
