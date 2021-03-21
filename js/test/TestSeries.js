@@ -42,6 +42,10 @@ TestSeries.prototype.testOneClass = function (Klass, methodPattern) {
 
         this._testOneMethod(test, test[method], methodPattern);
     }
+
+    if (typeof Klass['cleanup'] === 'function') {
+        Klass.cleanup();
+    }
 };
 
 TestSeries.prototype._testOneMethod = function (test, method, methodPattern) {
