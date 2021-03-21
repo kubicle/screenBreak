@@ -1,12 +1,11 @@
 {
     "main": "index.html",
-    "name": "screenBreak",
-    "version": "0.1.0",
-    "dependencies": {
-    },
+    "name": "screen_break",
+    "version": "0.2.0",
+    "dependencies": {},
     "devDependencies": {
         "browserify": "~13.0.0",
-        "lessify": "~1.0.1",
+        "lessify": "^1.0.2",
         "watchify": "^3.2.2",
         "uglify-js": "~2.6.2"
     },
@@ -16,7 +15,7 @@
         "test": "watchify js/test/testApp.js -o build/testBuild.js -t lessify -v"
     },
     "window": {
-        "title": "node-webkit demo",
+        "title": "node-webkit app",
         "icon": "appIcon.png",
         "toolbar": false,
         "transparent": true,
