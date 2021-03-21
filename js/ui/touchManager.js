@@ -78,7 +78,7 @@ TouchManager.prototype._listen = function (target, on) {
         if (this.target !== null) console.error('Forgot to stop listening on', this.target);
         this.holding = true;
         this.target = target;
-        target.addEventListener('touchmove', touchmoveHandler);
+        target.addEventListener('touchmove', touchmoveHandler, { passive: true });
         target.addEventListener('touchend', touchendHandler);
         target.addEventListener('touchcancel', touchcancelHandler);
         document.addEventListener('mousemove', mousemoveHandler);
@@ -165,6 +165,6 @@ TouchManager.prototype._onTouchEnd = function (ev, target) {
 TouchManager.prototype.listenOn = function (elt, handlerFn) {
     elt.touchHandlerFn = handlerFn;
 
-    elt.addEventListener('touchstart', touchstartHandler);
+    elt.addEventListener('touchstart', touchstartHandler, { passive: true });
     elt.addEventListener('mousedown', mousedownHandler);
 };
