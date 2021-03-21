@@ -46,7 +46,11 @@ Ui.prototype._createGauge = function (parent) {
     this.red = gauge.newDiv('colorBand red');
     this.label = gauge.newDiv('label');
 
-    touchManager.listenOn(gauge.elt, this._switchDisplay.bind(this));
+    var self = this;
+    touchManager.listenOn(gauge.elt, function (eventName) {
+        if (eventName !== 'tap') return;
+        self._switchDisplay();
+    });
 };
 
 Ui.prototype._createButtons = function (parent) {
