@@ -1,4 +1,12 @@
-- [run it](http://rawgit.com/kubicle/screenBreak/master/index.html) in your browser.
+- To give it a quick test, [run it](http://rawgit.com/kubicle/screenBreak/master/index.html) in your browser.
+
+- If you like it, install [NW.js](https://nwjs.io/) then start it as an app from command line. Example: 
+```SH
+# Suppose you have screenNbreak repo checked out in ~/Documents/tools/screenBreak
+# and NW.js files copied to ~/Documents/tools/nw
+cd ~/Documents/tools/screenBreak
+~/Documents/tools/nw/nwjs-v0.52.0-osx-x64/nwjs.app/Contents/MacOS/nwjs .
+```
 
 # Indications
 This tiny application can help you minimize various health and efficiency issues created by sitting too long in front of a computer screen:
