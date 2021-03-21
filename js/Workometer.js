@@ -13,7 +13,8 @@ function Workometer(state) {
 	this.isResting = true; // created in "resting" state; we will be starting work right away
 
 	state = state || {};
-	this.time0 = this.lastWorkTime = state.lastWorkTime || Date.now();
+	this.lastUserAction = Date.now();
+	this.time0 = state.lastWorkTime || Date.now();
 	this.taskWork = state.taskWork || 0;
 	this.fatigue = state.fatigue || 0;
 	this.tasks = state.tasks || {};
@@ -32,7 +33,7 @@ module.exports = Workometer;
 
 Workometer.prototype.gotBreak = function (minPause) {
 	var correction = minPause * MINUTE;
-	this._updateFatigue(correction);
+	this._removeFatigue(correction);
 	this.taskWork = Math.max(this.taskWork - correction, 0);
 	this.todaysWork = Math.max(this.todaysWork - correction, 0);
 };
@@ -41,7 +42,7 @@ Workometer.prototype.serialize = function () {
 	this._saveCurTask();
 
 	return {
-		lastWorkTime: this.lastWorkTime,
+		lastWorkTime: this.time0,
 		taskWork: this.taskWork,
 		todaysWork: this.todaysWork,
 		fatigue: this.fatigue,
@@ -50,39 +51,32 @@ Workometer.prototype.serialize = function () {
 	};
 };
 
-Workometer.prototype._checkNewDay = function () {
-	if (Date.now() - this.lastWorkTime <= NEW_DAY_BREAK) return;
-
-	this.todaysWork = 0;
-	this.todaysLongestWork = 0;
-	this.todaysTooLongCount = 0;
-};
-
 Workometer.prototype.start = function () {
 	if (!this.isResting) return;
-	this._checkNewDay();
-	this._countTime();
-	this.time0 = this.lastWorkTime = Date.now();
+	this._startTimePeriod();
 	this.isResting = false;
-};
-
-Workometer.prototype._updateFatigue = function (pause) {
-	this.fatigue = Math.max(this.fatigue - pause, 0);
-};
-
-// Called when we did not "stop" but timers could not fire (computer went on pause)
-Workometer.prototype.backFromSleep = function (pause) {
-	this._checkNewDay();
-	this._updateFatigue(pause);
-	this.time0 = this.lastWorkTime = Date.now();
-	// NB: no need to adjust time counting since _countTime was not called during the pause
 };
 
 Workometer.prototype.stop = function () {
 	if (this.isResting) return;
-	this._countTime();
-	this.time0 = this.lastWorkTime = Date.now();
+	this._startTimePeriod();
 	this.isResting = true;
+};
+
+// Called when we did not "stop" but timers could not fire (computer went on pause)
+Workometer.prototype.backFromSleep = function (pauseMs) {
+	if (this.isResting) {
+		this._startTimePeriod();
+	} else {
+		this.time0 += pauseMs; // adjust so pause is not counted as work
+		this._startTimePeriod();
+		this._removeFatigue(pauseMs);
+	}
+};
+
+Workometer.prototype._startTimePeriod = function () {
+	this._countTime();
+	this.lastUserAction = Date.now();
 };
 
 Workometer.prototype._countTime = function () {
@@ -90,17 +84,37 @@ Workometer.prototype._countTime = function () {
 	var delta = now - this.time0;
 	this.time0 = now;
 
+	// checkNewDay
+	if (now - this.lastUserAction >= NEW_DAY_BREAK) {
+		this.todaysWork = 0;
+		this.todaysLongestWork = 0;
+		this.todaysTooLongCount = 0;
+		this.fatigue = 0;
+		this.lastUserAction = Date.now(); // force reset; user action did not actually happen
+		delta = 0; // OK to reset everything here and leave it at that
+	}
+	
 	if (this.isResting) {
-		this._checkNewDay();
-		this._updateFatigue(delta);
+		this._removeFatigue(delta);
 	} else {
+		this._addFatigue(delta);
+
 		this.taskWork += delta;
 		this.todaysWork += delta;
-		this.fatigue += delta / NONSTOP_PERIOD * REST_FOR_NONSTOP_PERIOD;
+
 		if (delta > this.todaysLongestWork) this.todaysLongestWork = delta;
 		if (delta > HOUR) this.todaysTooLongCount++;
 	}
+
 	this.level = this.fatigue / REST_FOR_NONSTOP_PERIOD * 100;
+};
+
+Workometer.prototype._removeFatigue = function (pauseMs) {
+	this.fatigue = Math.max(this.fatigue - pauseMs, 0);
+};
+
+Workometer.prototype._addFatigue = function (workMs) {
+	this.fatigue += workMs / NONSTOP_PERIOD * REST_FOR_NONSTOP_PERIOD;
 };
 
 //--- Task management
@@ -156,6 +170,7 @@ Workometer.prototype.getTask = function () {
 
 //---
 
+// Called regularly by UI
 Workometer.prototype.getStatus = function (status) {
 	this._countTime();
 

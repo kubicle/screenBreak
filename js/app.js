@@ -67,6 +67,9 @@ App.prototype.refresh = function () {
 	var extraPause = timeSinceLastRefresh - this.currentFreq;
 	if (extraPause > 5 * SECOND) {
 		this.workometer.backFromSleep(extraPause);
+		// We force pause mode so user has to explicitely tap
+		// otherwise a false move (e.g. mouse) would start a full work period
+		if (this.isWorking) this.toggle();
 	}
 
 	this.ui.refresh();
