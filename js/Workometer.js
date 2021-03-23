@@ -31,8 +31,8 @@ function Workometer(state) {
 module.exports = Workometer;
 
 
-Workometer.prototype.gotBreak = function (minPause) {
-	var correction = minPause * MINUTE;
+Workometer.prototype.gotBreak = function (pauseInMin) {
+	var correction = pauseInMin * MINUTE;
 	this._removeFatigue(correction);
 	this.taskWork = Math.max(this.taskWork - correction, 0);
 	this.todaysWork = Math.max(this.todaysWork - correction, 0);
