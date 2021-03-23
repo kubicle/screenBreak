@@ -1,4 +1,5 @@
 {
+    "appDisplayName": "ScreenBreak",
     "pauseBtn": "Take a break",
     "workBtn": "I am here",
     "hourShort": "h",
@@ -9,6 +10,7 @@
 
     "gotBreakAction": "Got a break",
     "taskAction": "Tasks...",
+    "aboutAction": "About...",
     "exitAction": "Exit",
     "newTaskAction": "New task...",
     "editTaskAction": "Edit task...",
@@ -23,5 +25,5 @@
     "taskName": "Name",
     "taskTime": "Worked time",
     "invalidValue": "Invalid value",
-    "problem": "Problem",
+    "problem": "Problem"
 }

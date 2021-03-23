@@ -4,6 +4,7 @@ require('./mainUi.less');
 var ContextMenu = require('./ContextMenu');
 var Dome = require('./Dome');
 var getText = require('./getText');
+var PopupDlg = require('./PopupDlg');
 var nwUtil = require('../nwUtil');
 var TaskDlg = require('./TaskDlg');
 var touchManager = require('./TouchManager');
@@ -33,7 +34,7 @@ module.exports = Ui;
 /** This is the entry point for starting the app */
 Ui.prototype.createUi = function () {
     if (!nwUtil.isNw()) document.body.style.backgroundColor = '#222';
-    Dome.setPageTitle(this.app.appName);
+    Dome.setPageTitle(getText('appDisplayName'));
     var mainDiv = Dome.newDiv(document.body, 'mainDiv');
     this._createGauge(mainDiv);
     this._createButtons(mainDiv);
@@ -64,8 +65,18 @@ Ui.prototype._showSettingsMenu = function () {
     var cm = new ContextMenu();
     cm.addOption(getText('gotBreakAction'), this.eventHandler.bind(this, 'gotBreak'));
     cm.addOption(getText('taskAction'), this._showTaskMenu.bind(this));
+    cm.addOption(getText('aboutAction'), this._showAboutBox.bind(this));
     if (nwUtil.isNw()) cm.addOption(getText('exitAction'), this.eventHandler.bind(this, 'exit'));
     cm.attachMenu(this.settingsBtn);
+};
+
+Ui.prototype._showAboutBox = function () {
+    var title = getText('appDisplayName');
+    var text = 'Package: ' + this.app.appName +
+        '\nVersion: ' + this.app.appVersion +
+        '\n\n' + nwUtil.envInfo();
+
+	return new PopupDlg(null, text, title);
 };
 
 function taskSwitchHandler() {

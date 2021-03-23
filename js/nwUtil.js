@@ -183,3 +183,11 @@ exports.terminate = function () {
 };
 
 exports.isNw = function () { return isNw; };
+
+exports.envInfo = function () {
+    if (isNw) {
+        return 'NW.js: ' + process.versions['node-webkit'];
+    } else {
+        return 'Browser: ' + navigator.userAgent;
+    }
+};
