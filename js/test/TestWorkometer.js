@@ -246,6 +246,29 @@ TestWorkometer.prototype.testComputerSleep = function () {
     this.assertEqual(0, status.todaysWork);
     this.assertEqual(0, status.fatigue);
     this.assertEqual(444555 + workMs, status.taskWork); // work did not change!
+
+    // computer long sleep while working = no work but next day
+    fakeDateNow(lastWorkTime0);
+    w = newWorkometer();
+    fakeDateNow(lastWorkTime0);
+    w.start();
+    fakeDateNow(lastWorkTime0 + 8 * HOUR);
+    w.backFromSleep(7 * HOUR);
+    w.getStatus(status);
+    this.assertEqual(0, status.todaysWork);
+    this.assertEqual(0, status.fatigue);
+    this.assertEqual(444555, status.taskWork);
+    // same as above but user "stops" before timer
+    fakeDateNow(lastWorkTime0);
+    w = newWorkometer();
+    fakeDateNow(lastWorkTime0);
+    w.start();
+    fakeDateNow(lastWorkTime0 + 8 * HOUR);
+    w.stop();
+    w.getStatus(status);
+    this.assertEqual(0, status.todaysWork);
+    this.assertEqual(0, status.fatigue);
+    this.assertEqual(444555, status.taskWork);
 };
 
 //TODO: add tests for task switching, creating, etc.
