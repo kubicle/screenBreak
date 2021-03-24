@@ -228,6 +228,20 @@ TestWorkometer.prototype.testComputerSleep = function () {
     this.assertEqual(0, status.todaysWork);
     this.assertEqual(0, status.fatigue);
 
+    // Sleep while resting but regular wake-ups (e.g. Mac "power nap" mode)
+    fakeDateNow(lastWorkTime0);
+    w = newWorkometer();
+    w.stop();
+    var wakeupDelay = HOUR;
+    var wakeupTime = lastWorkTime0;
+    for (var i = 1; i <= 6; i++) {
+        this.assertEqual(9555555, w.todaysWork);
+        wakeupTime += wakeupDelay;
+        fakeDateNow(wakeupTime);
+        w.backFromSleep(wakeupDelay);
+    }
+    this.assertEqual(0, w.todaysWork); // new day detected
+
     // work a long time... without human action
     fakeDateNow(lastWorkTime0);
     w = newWorkometer();
@@ -258,7 +272,7 @@ TestWorkometer.prototype.testComputerSleep = function () {
     this.assertEqual(0, status.todaysWork);
     this.assertEqual(0, status.fatigue);
     this.assertEqual(444555, status.taskWork);
-    // same as above but user "stops" before timer
+    // same as above but user "stops" before timer triggers "backFromSleep"
     fakeDateNow(lastWorkTime0);
     w = newWorkometer();
     fakeDateNow(lastWorkTime0);

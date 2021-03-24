@@ -66,7 +66,7 @@ Workometer.prototype.stop = function () {
 // Called when we did not "stop" but timers could not fire (computer went on pause)
 Workometer.prototype.backFromSleep = function (pauseMs) {
 	if (this.isResting) {
-		this._startTimePeriod();
+		this._countTime();
 	} else {
 		this.time0 += pauseMs; // adjust so pause is not counted as work
 		this._startTimePeriod();
