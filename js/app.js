@@ -13,6 +13,9 @@ var SECOND = 1000, MINUTE = 60000;
 var WORKING_REFRESH_FREQ = 10 * SECOND;
 var RESTING_REFRESH_FREQ = 1 * SECOND;
 
+// Save regularly; useful for crashes or unexpected system shutdown
+var SAVE_FREQ = 3 * MINUTE;
+
 var WORKING_ALERT_FREQ = 15 * MINUTE;
 var RESTING_ALERT_FREQ = 1 * MINUTE;
 
@@ -84,7 +87,9 @@ App.prototype._checkAlert = function () {
 	var timeSinceLastAlert = now - this.lastAlertTime;
 
 	if (this.isWorking) {
-		this._save(); // a bit too often; useful for crashes or unexpected system shutdown
+		if (timeSinceLastAlert > SAVE_FREQ) {
+			this._save();
+		}
 		// Could be optional: this gives a chance to notice we forgot to switch task, etc.
 		if (timeSinceLastAlert >= WORKING_ALERT_FREQ) {
 			this.lastAlertTime = now;
