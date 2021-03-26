@@ -8,7 +8,9 @@ var localPref = require('./localPref');
 
 var SECOND = 1000, MINUTE = 60000;
 
-var WORKING_REFRESH_FREQ = 1 * MINUTE;
+// UI refresh frequency; this is also the heartbeat of the app,
+// i.e. nothing can happen more often than these 2 frequencies
+var WORKING_REFRESH_FREQ = 10 * SECOND;
 var RESTING_REFRESH_FREQ = 1 * SECOND;
 
 var WORKING_ALERT_FREQ = 15 * MINUTE;
