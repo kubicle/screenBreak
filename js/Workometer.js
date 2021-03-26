@@ -1,11 +1,7 @@
 'use strict';
 
+var CONST = require('./constants');
 var Task = require('./Task');
-
-var MINUTE = 60000, HOUR = 3600000;
-var NONSTOP_PERIOD = 60 * MINUTE;
-var REST_FOR_NONSTOP_PERIOD = 5 * MINUTE;
-var NEW_DAY_BREAK = 6 * HOUR;
 
 
 function Workometer(state) {
@@ -31,11 +27,10 @@ function Workometer(state) {
 module.exports = Workometer;
 
 
-Workometer.prototype.gotBreak = function (pauseInMin) {
-	var correction = pauseInMin * MINUTE;
-	this._removeFatigue(correction);
-	this.taskWork = Math.max(this.taskWork - correction, 0);
-	this.todaysWork = Math.max(this.todaysWork - correction, 0);
+Workometer.prototype.gotBreak = function (pauseInMs) {
+	this._removeFatigue(pauseInMs);
+	this.taskWork = Math.max(this.taskWork - pauseInMs, 0);
+	this.todaysWork = Math.max(this.todaysWork - pauseInMs, 0);
 };
 
 Workometer.prototype.serialize = function () {
@@ -85,7 +80,7 @@ Workometer.prototype._countTime = function () {
 	this.time0 = now;
 
 	// checkNewDay
-	if (now - this.lastUserAction >= NEW_DAY_BREAK && this.todaysWork > 0) {
+	if (now - this.lastUserAction >= CONST.NEW_DAY_BREAK && this.todaysWork > 0) {
 		this.startNewDay();
 		delta = 0; // OK to reset everything here
 	}
@@ -98,11 +93,13 @@ Workometer.prototype._countTime = function () {
 		this.taskWork += delta;
 		this.todaysWork += delta;
 
-		if (delta > this.todaysLongestWork) this.todaysLongestWork = delta;
-		if (delta > HOUR) this.todaysTooLongCount++;
+		if (delta > this.todaysLongestWork)
+			this.todaysLongestWork = delta;
+		if (delta > CONST.NONSTOP_PERIOD)
+			this.todaysTooLongCount++;
 	}
 
-	this.level = this.fatigue / REST_FOR_NONSTOP_PERIOD * 100;
+	this.level = this.fatigue / CONST.REST_FOR_NONSTOP_PERIOD * 100;
 };
 
 Workometer.prototype.startNewDay = function () {
@@ -119,7 +116,7 @@ Workometer.prototype._removeFatigue = function (pauseMs) {
 };
 
 Workometer.prototype._addFatigue = function (workMs) {
-	this.fatigue += workMs / NONSTOP_PERIOD * REST_FOR_NONSTOP_PERIOD;
+	this.fatigue += workMs / CONST.NONSTOP_PERIOD * CONST.REST_FOR_NONSTOP_PERIOD;
 };
 
 //--- Task management

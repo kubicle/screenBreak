@@ -1,28 +1,11 @@
 'use strict';
 
+var CONST = require('./constants');
 var pkg = require('../package.json');
 var Ui = require('./ui/Ui');
 var Workometer = require('./Workometer');
 var nwUtil = require('./nwUtil');
 var localPref = require('./localPref');
-
-var SECOND = 1000, MINUTE = 60000;
-
-// UI refresh frequency; this is also the heartbeat of the app,
-// i.e. nothing can happen more often than these 2 frequencies
-var WORKING_REFRESH_FREQ = 10 * SECOND;
-var RESTING_REFRESH_FREQ = 1 * SECOND;
-
-// Save regularly; useful for crashes or unexpected system shutdown
-var SAVE_FREQ = 3 * MINUTE;
-
-var WORKING_ALERT_FREQ = 15 * MINUTE;
-var RESTING_ALERT_FREQ = 1 * MINUTE;
-
-var AUTOPAUSE_AFTER_INACTION = 75 * MINUTE;
-
-var ANNOYING_ALERT_LEVEL = 100; // percentage of gauge
-var ANNOYING_ALERT_REPEAT_DELAY = 10 * MINUTE; // you can make the annoying alert quite for that much before it comes back
 
 
 function App() {
@@ -70,7 +53,7 @@ App.prototype.refresh = function () {
 	this.lastRefresh = now;
 
 	var extraPause = timeSinceLastRefresh - this.currentFreq;
-	if (extraPause > 5 * SECOND) {
+	if (extraPause > CONST.SAVE_FREQ) { // why SAVE_FREQ: Because short and long enough
 		this.workometer.backFromSleep(extraPause);
 		// We force pause mode so user has to explicitely tap
 		// otherwise a false move (e.g. mouse) would start a full work period
@@ -87,25 +70,27 @@ App.prototype._checkAlert = function () {
 	var timeSinceLastAlert = now - this.lastAlertTime;
 
 	if (this.isWorking) {
-		if (timeSinceLastAlert > SAVE_FREQ) {
+		if (timeSinceLastAlert > CONST.SAVE_FREQ) {
 			this._save();
 		}
 		// Could be optional: this gives a chance to notice we forgot to switch task, etc.
-		if (timeSinceLastAlert >= WORKING_ALERT_FREQ) {
+		if (timeSinceLastAlert >= CONST.WORKING_ALERT_FREQ) {
 			this.lastAlertTime = now;
 			this.ui.showAlert(5);
 		}
 		var timeInactive = now - this.lastUserActionTime;
 		// When user worked over the maximum of the gauge, we complain; he can "toggle" it off each time
-		if (this.workometer.getLevel() >= ANNOYING_ALERT_LEVEL && timeInactive > ANNOYING_ALERT_REPEAT_DELAY) {
+		if (this.workometer.getLevel() >= CONST.ANNOYING_ALERT_LEVEL &&
+				timeInactive > CONST.ANNOYING_ALERT_REPEAT_DELAY
+		) {
 			this.ui.showAlert();
 		}
 		// If we did not see any user action in a while, declare this a break
-		if (timeInactive > AUTOPAUSE_AFTER_INACTION) {
+		if (timeInactive > CONST.AUTOPAUSE_AFTER_INACTION) {
 			this.toggle(); // NB: annoying alert stays on while we "rest" (user is most likely gone anyway)
 		}
 	} else {
-		if (timeSinceLastAlert >= RESTING_ALERT_FREQ) {
+		if (timeSinceLastAlert >= CONST.RESTING_ALERT_FREQ) {
 			// Sometimes user came back but forgot to say it; we alert here for this case
 			this.lastAlertTime = now;
 			this.ui.showAlert(20);
@@ -124,7 +109,9 @@ App.prototype.toggle = function () {
 	this.refresh(); // 1st refresh right now
 
 	window.clearInterval(this.refreshInterval);
-	this.currentFreq = this.isWorking ? WORKING_REFRESH_FREQ : RESTING_REFRESH_FREQ;
+	this.currentFreq = this.isWorking
+		? CONST.WORKING_REFRESH_FREQ
+		: CONST.RESTING_REFRESH_FREQ;
 	this.refreshInterval = window.setInterval(this.refreshMethod, this.currentFreq);
 };
 
@@ -134,7 +121,7 @@ App.prototype._noteUserIsHere = function () {
 };
 
 App.prototype.gotBreak = function () {
-	this.workometer.gotBreak(5);
+	this.workometer.gotBreak(CONST.GOT_BREAK_MS);
 	this.refresh();
 };
 
