@@ -1,0 +1,16 @@
+{
+    "env": {
+        "node": true,
+        "browser": true
+    },
+    "extends": "eslint:recommended",
+    "rules": {
+        "indent": [0, "tab"],
+        "quotes": [2, "single"],
+        "semi": [2, "always"],
+        "no-undef": "error"
+    },
+    "globals": {
+        "nw": "readonly"
+    }
+}

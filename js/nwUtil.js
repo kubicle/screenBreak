@@ -2,7 +2,6 @@
 
 var Arranger = require('./ui/Arranger');
 
-var isInitialized = false;
 var isNw = false;
 var beforeunloadHandlers = [];
 
@@ -166,7 +165,6 @@ function initializeForBrowser() {
 }
 
 exports.initialize = function () {
-    isInitialized = true;
     isNw = typeof process !== 'undefined' && !!process.versions['node-webkit'];
 
     if (isNw) {

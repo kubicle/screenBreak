@@ -51,7 +51,7 @@ TestCase.prototype._compareObject = function (expected, value) {
 
 TestCase.prototype.compareValue = function (expected, val) {
     if (expected instanceof Array) {
-        if (!val instanceof Array) return 'Expected Array but got ' + val;
+        if (!(val instanceof Array)) return 'Expected Array but got ' + val;
         for (var i = 0; i < expected.length; i++) {
             var msg = this.compareValue(expected[i], val[i]);
             if (msg) return 'Array item #' + i + ': ' + msg;
