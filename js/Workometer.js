@@ -103,7 +103,6 @@ Workometer.prototype._countTime = function () {
 };
 
 Workometer.prototype.startNewDay = function () {
-	console.log('_startNewDay', Date.now());
 	this.todaysWork = 0;
 	this.todaysLongestWork = 0;
 	this.todaysTooLongCount = 0;
