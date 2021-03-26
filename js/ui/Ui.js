@@ -63,11 +63,17 @@ Ui.prototype._createButtons = function (parent) {
 
 Ui.prototype._showSettingsMenu = function () {
     var cm = new ContextMenu();
-    cm.addOption(getText('gotBreakAction'), this.eventHandler.bind(this, 'gotBreak'));
     cm.addOption(getText('taskAction'), this._showTaskMenu.bind(this));
+    cm.addOption(getText('gotBreakAction'), this.eventHandler.bind(this, 'gotBreak'));
+    cm.addOption(getText('newDayAction'), this._startNewDay.bind(this));
     cm.addOption(getText('aboutAction'), this._showAboutBox.bind(this));
     if (nwUtil.isNw()) cm.addOption(getText('exitAction'), this.eventHandler.bind(this, 'exit'));
     cm.attachMenu(this.settingsBtn);
+};
+
+Ui.prototype._startNewDay = function () {
+    this.app.workometer.startNewDay();
+    this.refresh();
 };
 
 Ui.prototype._showAboutBox = function () {

@@ -10,6 +10,7 @@
 
     "gotBreakAction": "Got a break",
     "taskAction": "Tasks...",
+    "newDayAction": "Start new day",
     "aboutAction": "About...",
     "exitAction": "Exit",
     "newTaskAction": "New task...",

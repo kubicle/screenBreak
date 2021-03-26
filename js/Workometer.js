@@ -85,13 +85,9 @@ Workometer.prototype._countTime = function () {
 	this.time0 = now;
 
 	// checkNewDay
-	if (now - this.lastUserAction >= NEW_DAY_BREAK) {
-		this.todaysWork = 0;
-		this.todaysLongestWork = 0;
-		this.todaysTooLongCount = 0;
-		this.fatigue = 0;
-		this.lastUserAction = Date.now(); // force reset; user action did not actually happen
-		delta = 0; // OK to reset everything here and leave it at that
+	if (now - this.lastUserAction >= NEW_DAY_BREAK && this.todaysWork > 0) {
+		this.startNewDay();
+		delta = 0; // OK to reset everything here
 	}
 	
 	if (this.isResting) {
@@ -107,6 +103,15 @@ Workometer.prototype._countTime = function () {
 	}
 
 	this.level = this.fatigue / REST_FOR_NONSTOP_PERIOD * 100;
+};
+
+Workometer.prototype.startNewDay = function () {
+	console.log('_startNewDay', Date.now());
+	this.todaysWork = 0;
+	this.todaysLongestWork = 0;
+	this.todaysTooLongCount = 0;
+	this.fatigue = 0;
+	this.lastUserAction = Date.now();
 };
 
 Workometer.prototype._removeFatigue = function (pauseMs) {
