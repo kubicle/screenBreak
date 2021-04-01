@@ -17,6 +17,7 @@
     "window": {
         "title": "node-webkit app",
         "icon": "appIcon.png",
+        "show_in_taskbar": false,
         "toolbar": false,
         "transparent": true,
         "frame": false,
