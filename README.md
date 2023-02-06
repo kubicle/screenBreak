@@ -1,4 +1,4 @@
-- To give it a quick test, [run it](http://rawgit.com/kubicle/screenBreak/master/index.html) in your browser.
+- To give it a quick test, [run it](https://kubicle.github.io/screenBreak/) in your browser.
 
 - If you like it, install [NW.js](https://nwjs.io/) then start it as an app from command line. Example: 
 ```SH
